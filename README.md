@@ -43,14 +43,6 @@ For live imports, add `OPENAI_API_KEY` to `.env` and place a PNG model reference
 - Keeps originals, jobs, generated images, and the JSON database local in `data/`
 - Supports drag, drop, paste, editing, review, regeneration, and approval
 
-## Docker
-
-```bash
-docker compose up --build
-```
-
-Open [localhost:4173](http://localhost:4173). The `data/` directory is mounted into the container and is never committed.
-
 ## Configuration
 
 | Variable | Default |
