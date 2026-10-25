@@ -10,6 +10,7 @@ import { brandProductApi } from "./scripts/brand-product-api.mjs";
 import { syncApi } from "./scripts/sync-api.mjs";
 import { productPageApi } from "./scripts/product-page-api.mjs";
 import { feedbackApi } from "./scripts/feedback-api.mjs";
+import { tryOnApi } from "./scripts/tryon-api.mjs";   // [參賽版新增 2026-10-25] YouCam 試穿
 
 export default defineConfig(() => {
   return {
@@ -30,6 +31,6 @@ export default defineConfig(() => {
       port: 4173,
       allowedHosts: ["localhost"],
     },
-    plugins: [react(), responsiveImageApi(), wardrobeDataApi(), brandProductApi(), syncApi(), productPageApi(), feedbackApi()],
+    plugins: [react(), responsiveImageApi(), wardrobeDataApi(), brandProductApi(), syncApi(), productPageApi(), feedbackApi(), tryOnApi()],
   };
 });

@@ -7,7 +7,11 @@ import { track } from "./analytics.js";
 
 /** @param where 在哪一頁(入口、衣櫃、搭配),跟著送出,方便對照是哪一步卡住
  *  @param label 按鈕上的字;歡迎畫面頁尾用「意見回饋」,其他頁照舊 */
-export function Feedback({ where = "", className = "", label = "哪裡卡住了？告訴我" }) {
+// [參賽版修改 2026-10-25] 參賽版不收回報:正式站的回報送進站主私人的 Discord 頻道,參賽網站不接那裡。
+// 原本的元件留著(FeedbackForm),要接回來把下面這行拿掉就好。
+export function Feedback() { return null; }
+
+export function FeedbackForm({ where = "", className = "", label = "哪裡卡住了？告訴我" }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [contact, setContact] = useState("");

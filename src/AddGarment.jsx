@@ -11,6 +11,13 @@ import { fixCutout, modelReady, preloadModel, preloadsEarly, removeBg } from "./
 import { CURRENCIES, parsePrice } from "./price.js";
 import { brandInUrl, brandOf, brandSuggestions, canonicalBrand } from "./brands.js";
 import { track } from "./analytics.js";
+import { TryOnPanel, useTryOn } from "./TryOn.jsx";   // [參賽版新增 2026-10-25] YouCam 試穿
+
+/** 店裡比一下:還沒買、還沒存的這件也能試穿;key 用這次去背的圖,換一件就是新的 */
+function StoreTryOn({ draft }) {
+  const state = useTryOn({ garmentKey: draft.blob ? `store|${draft.preview}` : "", garmentSrc: draft.preview, part: draft.part });
+  return <TryOnPanel state={state} compact />;
+}
 
 // 分類清單在 src/parts.js(新增的選單照組排:衣服、鞋襪、配件、小物)
 
@@ -995,6 +1002,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
                         id: "store-check", part: draft.part, name: storeName(draft), color: draft.color, secondaryColor: draft.secondaryColor,
                         tags: [], image: draft.preview, thumbnail: draft.preview, wishlist: true,
                       }, existing.filter((item) => !item.wishlist))}
+                      <StoreTryOn draft={draft} />
                       <small className="add-hint">店裡的燈光、明暗跟在家拍的不一樣,所以這裡比的是「顏色相近」:深藍和黑、米白和白可能一起出現,看縮圖判斷。</small>
                     </>
                   )}

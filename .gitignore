@@ -20,3 +20,8 @@ _insp.mjs
 
 # 同步的開發用假雲端(scripts/sync-api.mjs)
 .sync-dev/
+
+# 參賽版的匯出(tools/export-static.mjs)與本機筆記
+contest-site/
+project.md
+.claude/

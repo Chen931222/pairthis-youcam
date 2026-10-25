@@ -31,6 +31,7 @@ import { useFullImage } from "./useFullImage.js";
 import { brandOf, brandSuggestions, canonicalBrand } from "./brands.js";
 import { partFromName } from "./brandLink.js";
 import { noteRecommendation } from "./taste.js";
+import { TryOnPanel, useTryOn } from "./TryOn.jsx";   // [參賽版新增 2026-10-25] YouCam 試穿
 
 const STORAGE_KEY = "open-wardrobe-edits-v1";
 const DELETED_STORAGE_KEY = "open-wardrobe-deleted-v1";
@@ -1126,7 +1127,9 @@ function ItemViewer({ item, gone = false, owned, onClose, onSave, onDelete, onWe
   }
 
   const type = TYPE_MAP[item.part]?.singular || "衣物";
-  const hasModeledImage = Boolean(item.modeledImage);
+  // 試穿過的(這台、這張照片):試穿照當頂端的大圖,用上游 modeledImage 的版面;換了圖就要重新試
+  const tryOn = useTryOn({ garmentKey: gone ? "" : `${item.id}|${item.thumbnail || item.image}`, garmentSrc: viewImage, part: item.part });
+  const hasModeledImage = Boolean(tryOn.resultUrl || item.modeledImage);
   const pieceRotation = useMemo(() => {
     const hash = [...item.id].reduce((total, character) => total + character.charCodeAt(0), 0);
     return `${(hash % 9) - 4}deg`;
@@ -1334,16 +1337,21 @@ function ItemViewer({ item, gone = false, owned, onClose, onSave, onDelete, onWe
       </button>
 
       {hasModeledImage ? (
-        <div className="modeled-hero">
-          <OptimizedImage
-            className="modeled-hero-photo"
-            src={item.modeledImage}
-            alt={`模特兒穿著${draft.name || type}`}
-            sizes="(max-width: 860px) 100vw, 520px"
-            breakpoints={[320, 480, 640, 800, 1040, 1280]}
-            quality={82}
-            priority
-          />
+        <div className={tryOn.resultUrl ? "modeled-hero is-tryon" : "modeled-hero"}>
+          {tryOn.resultUrl ? (
+            <img className="modeled-hero-photo" src={tryOn.resultUrl} alt={`你穿著${draft.name || type}的試穿照(AI 產生)`} />
+          ) : (
+            <OptimizedImage
+              className="modeled-hero-photo"
+              src={item.modeledImage}
+              alt={`模特兒穿著${draft.name || type}`}
+              sizes="(max-width: 860px) 100vw, 520px"
+              breakpoints={[320, 480, 640, 800, 1040, 1280]}
+              quality={82}
+              priority
+            />
+          )}
+          {tryOn.resultUrl && <span className="tryon-badge">AI 試穿 · YouCam</span>}
           <div className="viewer-heading modeled-heading">
             <div>
               <h2>{draft.name || TYPE_MAP[draft.part]?.singular}</h2>
@@ -1391,6 +1399,7 @@ function ItemViewer({ item, gone = false, owned, onClose, onSave, onDelete, onWe
             <WishCheck item={item} owned={owned} onOpen={onOpen} onWearOutfit={onWearOutfit} />
           </div>
         )}
+        <TryOnPanel state={tryOn} />
         {canEditItem(item) ? (
           <>
             {/* 站主和自己加的衣服,單品頁原本只有編輯表單,要穿上得回搭配頁找(審查 F30) */}
