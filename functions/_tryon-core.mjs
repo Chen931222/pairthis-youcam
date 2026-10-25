@@ -10,10 +10,32 @@
 // 金鑰是環境變數 YOUCAM_API_KEY,只在伺服器。每次試穿扣 YouCam 的點數(文件寫 V2/V3 每次 2 點,V4 沒寫),
 // 點數用完 API 就回錯,不會刷卡;所以這裡的上限是為了讓評審期間還有點數,不是為了錢。
 
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 const BASE = "https://yce-api-01.makeupar.com/s2s/v2.0";
 export const CATEGORIES = new Set(["upper_body", "outer", "lower_body", "full_body", "shoes", "auto"]);
 const MAX_IMAGE = 3 * 1024 * 1024;     // 網頁先縮到長邊 1280、JPEG,正常 200–600KB;超過就是沒縮
 const TASK_ID = /^[A-Za-z0-9_-]{8,128}$/;
+const TICKET_TTL = 23 * 3600 * 1000;   // YouCam 的 task 留 24 小時
+
+// 查結果只認伺服器簽過的「票」(task.到期.簽名),不認 YouCam 原本的 task_id:試穿照上有臉,
+// 別人拿到或猜到一個 task_id 也領不走(2026-10-25 安全審查)。簽名的鑰匙從 YouCam 金鑰導出,不多一個環境變數
+const signer = (key) => createHmac("sha256", key).update("pairthis-tryon-ticket").digest();
+const sign = (key, body) => createHmac("sha256", signer(key)).update(body).digest("base64url");
+function makeTicket(key, task) {
+  const body = `${task}.${Date.now() + TICKET_TTL}`;
+  return `${body}.${sign(key, body)}`;
+}
+function readTicket(key, ticket) {
+  const parts = String(ticket || "").split(".");
+  if (parts.length !== 3 || !TASK_ID.test(parts[0]) || !/^\d+$/.test(parts[1])) return "";
+  const body = `${parts[0]}.${parts[1]}`;
+  const want = Buffer.from(sign(key, body));
+  const got = Buffer.from(parts[2]);
+  if (want.length !== got.length || !timingSafeEqual(want, got)) return "";
+  if (Number(parts[1]) < Date.now()) return "";
+  return parts[0];
+}
 
 // 每個 IP 一天最多開幾次試穿、全站(這一台 function)一天最多幾次。記在記憶體,Vercel 開好幾台時各算各的,
 // 跟 _rate-limit.mjs 一樣是擋大量亂打;真正的天花板是帳戶裡的點數
@@ -101,15 +123,15 @@ export async function startTryOn(request, key) {
     method: "POST",
     body: { src_file_id: src, ref_file_id: ref, garment_category: category },
   });
-  if (!task.task_id) throw new Error("YouCam 沒給 task_id");
-  return json(200, { task: task.task_id });
+  if (!task.task_id || !TASK_ID.test(task.task_id)) throw new Error("YouCam 沒給 task_id");
+  return json(200, { task: makeTicket(key, task.task_id) });
 }
 
-/** GET ?task=…:還在跑回 { status: "running" };好了回 { status: "done", image };失敗回 { status: "error", error } */
+/** GET ?task=<票>:還在跑回 { status: "running" };好了回 { status: "done", image };失敗回 { status: "error", error } */
 export async function checkTryOn(request, key) {
   if (!key) return json(503, { error: "not_configured" });
-  const task = new URL(request.url).searchParams.get("task") || "";
-  if (!TASK_ID.test(task)) return json(400, { error: "bad_request" });
+  const task = readTicket(key, new URL(request.url).searchParams.get("task"));
+  if (!task) return json(400, { error: "bad_request" });
   const data = await youcam(key, `/task/cloth-v4/${encodeURIComponent(task)}`);
   const status = data.task_status;
   if (status === "error") return json(200, { status: "error", error: data.error || "error" });
