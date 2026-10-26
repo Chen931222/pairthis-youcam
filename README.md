@@ -24,7 +24,7 @@ A closet app that dresses you from the clothes you already own. For the YouCam A
 | Result | `checkTryOn` | The server downloads the result and returns it as a data URL; the page saves it in IndexedDB. Nothing is stored on our server. |
 
 - The API key is a server environment variable (`YOUCAM_API_KEY`); it never reaches the browser.
-- Limits so one visitor can't use up the units: 4 starts per minute and 100 per day per IP address, 300 per day per server instance. The counts live in memory on each server instance, so they're a brake, not an exact quota. A try-on uses 2 YouCam units (measured).
+- Rate limits that slow any one visitor down, so the units last longer: 4 starts per minute and 100 per day per IP address, 300 per day per server instance. The counts live in memory on each server instance, so they're a brake, not an exact quota. A try-on uses 2 YouCam units (measured).
 - YouCam error codes (pose not found, more than one person, file too small, and so on) are turned into one plain sentence each in `src/tryon.js`.
 - Only tops and outerwear are offered. For bottoms and shoes YouCam needs a reference photo of the piece being worn, and closet photos are flat lays.
 
