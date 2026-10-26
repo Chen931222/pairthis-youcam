@@ -1,0 +1,517 @@
+[
+  {
+    "id": "import-541a8bc2-1554-4ee3-9694-39653974f146",
+    "name": "Charcoal washed denim wide-leg pants",
+    "part": "lowerbody",
+    "color": "#5a5459",
+    "secondaryColor": null,
+    "palette": [
+      "#5a5459"
+    ],
+    "tags": [
+      "denim",
+      "wide-leg",
+      "washed",
+      "elastic-waist",
+      "baggy",
+      "charcoal"
+    ],
+    "image": "/data/library/import-541a8bc2-1554-4ee3-9694-39653974f146-view.webp",
+    "thumbnail": "/data/library/import-541a8bc2-1554-4ee3-9694-39653974f146-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "541a8bc2-1554-4ee3-9694-39653974f146",
+    "warmth": 3,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-2c84275b-6dde-48a4-9f91-b5c2817762ed",
+    "name": "Dark brown-black washed straight-leg jeans",
+    "part": "lowerbody",
+    "color": "#4a4240",
+    "secondaryColor": null,
+    "palette": [
+      "#4a4240"
+    ],
+    "tags": [
+      "denim",
+      "jeans",
+      "straight-leg",
+      "washed-black",
+      "five-pocket",
+      "textured"
+    ],
+    "image": "/data/library/import-2c84275b-6dde-48a4-9f91-b5c2817762ed-view.webp",
+    "thumbnail": "/data/library/import-2c84275b-6dde-48a4-9f91-b5c2817762ed-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "2c84275b-6dde-48a4-9f91-b5c2817762ed",
+    "warmth": 3,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-b7b7008a-6b86-4e7b-8079-1c716894171a",
+    "name": "Off-white drop-shoulder long-sleeve pocket tee",
+    "part": "upperbody",
+    "color": "#ece4d4",
+    "secondaryColor": null,
+    "palette": [
+      "#ece4d4"
+    ],
+    "tags": [
+      "longsleeve",
+      "pocket-tee"
+    ],
+    "image": "/data/library/import-b7b7008a-6b86-4e7b-8079-1c716894171a-view.webp",
+    "thumbnail": "/data/library/import-b7b7008a-6b86-4e7b-8079-1c716894171a-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "b7b7008a-6b86-4e7b-8079-1c716894171a",
+    "warmth": 2,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-96009ee3-ddab-4eb9-9c7c-38517eef7725",
+    "name": "Navy ribbed knit crew-neck sweater",
+    "part": "upperbody",
+    "color": "#252c3e",
+    "secondaryColor": null,
+    "palette": [
+      "#252c3e"
+    ],
+    "tags": [
+      "knit",
+      "sweater",
+      "ribbed"
+    ],
+    "image": "/data/library/import-96009ee3-ddab-4eb9-9c7c-38517eef7725-view.webp",
+    "thumbnail": "/data/library/import-96009ee3-ddab-4eb9-9c7c-38517eef7725-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "96009ee3-ddab-4eb9-9c7c-38517eef7725",
+    "warmth": 4,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": false
+  },
+  {
+    "id": "import-edf302da-c12b-493e-a9ca-c2c6b6b37ff3",
+    "name": "Gray-blue cotton drop-shoulder crew sweatshirt",
+    "part": "upperbody",
+    "color": "#a8afb9",
+    "secondaryColor": null,
+    "palette": [
+      "#a8afb9"
+    ],
+    "tags": [
+      "sweatshirt",
+      "crewneck"
+    ],
+    "image": "/data/library/import-edf302da-c12b-493e-a9ca-c2c6b6b37ff3-view.webp",
+    "thumbnail": "/data/library/import-edf302da-c12b-493e-a9ca-c2c6b6b37ff3-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "edf302da-c12b-493e-a9ca-c2c6b6b37ff3",
+    "warmth": 3,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-a397925c-5639-4377-9b93-62cd34a0d567",
+    "name": "White cotton long-sleeve shirt",
+    "part": "upperbody",
+    "color": "#f2f0ea",
+    "secondaryColor": null,
+    "palette": [
+      "#f2f0ea"
+    ],
+    "tags": [
+      "shirt",
+      "longsleeve"
+    ],
+    "image": "/data/library/import-a397925c-5639-4377-9b93-62cd34a0d567-view.webp",
+    "thumbnail": "/data/library/import-a397925c-5639-4377-9b93-62cd34a0d567-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "a397925c-5639-4377-9b93-62cd34a0d567",
+    "warmth": 2,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-8cd1cfa3-7f8e-4f43-9ee2-11c0dad23c7c",
+    "name": "Khaki cotton drawstring relaxed shorts",
+    "part": "lowerbody",
+    "color": "#8e7a5c",
+    "secondaryColor": null,
+    "palette": [
+      "#8e7a5c"
+    ],
+    "tags": [
+      "shorts",
+      "drawstring"
+    ],
+    "image": "/data/library/import-8cd1cfa3-7f8e-4f43-9ee2-11c0dad23c7c-view.webp",
+    "thumbnail": "/data/library/import-8cd1cfa3-7f8e-4f43-9ee2-11c0dad23c7c-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "8cd1cfa3-7f8e-4f43-9ee2-11c0dad23c7c",
+    "warmth": 1,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-694650a4-f2fb-40f4-b68a-c8fccc2cddd2",
+    "name": "White oversized drop-shoulder half-sleeve tee (GU)",
+    "part": "upperbody",
+    "color": "#f5f3ee",
+    "secondaryColor": null,
+    "palette": [
+      "#f5f3ee"
+    ],
+    "tags": [
+      "tee",
+      "oversized",
+      "gu"
+    ],
+    "image": "/data/library/import-694650a4-f2fb-40f4-b68a-c8fccc2cddd2-view.webp",
+    "thumbnail": "/data/library/import-694650a4-f2fb-40f4-b68a-c8fccc2cddd2-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "694650a4-f2fb-40f4-b68a-c8fccc2cddd2",
+    "warmth": 1,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-7bc2fc11-8b9b-44dd-aac2-ff708aa3e2e3",
+    "name": "Navy cotton twill casual shorts (Timberland)",
+    "part": "lowerbody",
+    "color": "#1f2227",
+    "secondaryColor": null,
+    "palette": [
+      "#1f2227"
+    ],
+    "tags": [
+      "shorts",
+      "chino",
+      "timberland"
+    ],
+    "image": "/data/library/import-7bc2fc11-8b9b-44dd-aac2-ff708aa3e2e3-view.webp",
+    "thumbnail": "/data/library/import-7bc2fc11-8b9b-44dd-aac2-ff708aa3e2e3-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "7bc2fc11-8b9b-44dd-aac2-ff708aa3e2e3",
+    "warmth": 1,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-a3212656-bed2-4d19-9c42-6459a74df39d",
+    "name": "Black washed denim short-sleeve henley top",
+    "part": "upperbody",
+    "color": "#303136",
+    "secondaryColor": null,
+    "palette": [
+      "#303136"
+    ],
+    "tags": [
+      "tee",
+      "henley",
+      "denim"
+    ],
+    "image": "/data/library/import-a3212656-bed2-4d19-9c42-6459a74df39d-view.webp",
+    "thumbnail": "/data/library/import-a3212656-bed2-4d19-9c42-6459a74df39d-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "a3212656-bed2-4d19-9c42-6459a74df39d",
+    "warmth": 1,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-27d0fd02-3ba6-4db0-91bc-1e94549142d0",
+    "name": "Navy raw denim four-pocket chore jacket",
+    "part": "wholebody_up",
+    "color": "#212332",
+    "secondaryColor": null,
+    "palette": [
+      "#212332"
+    ],
+    "tags": [
+      "jacket",
+      "denim",
+      "chore"
+    ],
+    "image": "/data/library/import-27d0fd02-3ba6-4db0-91bc-1e94549142d0-view.webp",
+    "thumbnail": "/data/library/import-27d0fd02-3ba6-4db0-91bc-1e94549142d0-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "27d0fd02-3ba6-4db0-91bc-1e94549142d0",
+    "warmth": 3,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-7d5deaad-dac0-4391-9c09-e62d4d60446a",
+    "name": "Camel heavy cotton twill shirt jacket",
+    "part": "wholebody_up",
+    "color": "#9d7c40",
+    "secondaryColor": null,
+    "palette": [
+      "#9d7c40"
+    ],
+    "tags": [
+      "jacket",
+      "shirt-jacket"
+    ],
+    "image": "/data/library/import-7d5deaad-dac0-4391-9c09-e62d4d60446a-view.webp",
+    "thumbnail": "/data/library/import-7d5deaad-dac0-4391-9c09-e62d4d60446a-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "7d5deaad-dac0-4391-9c09-e62d4d60446a",
+    "warmth": 3,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-6677979f-0212-433d-9c9d-a1b5a3d8b9f1",
+    "name": "Navy hooded windbreaker (Polo Ralph Lauren)",
+    "part": "wholebody_up",
+    "color": "#2e3a5c",
+    "secondaryColor": null,
+    "palette": [
+      "#2e3a5c"
+    ],
+    "tags": [
+      "jacket",
+      "windbreaker",
+      "polo-rl"
+    ],
+    "image": "/data/library/import-6677979f-0212-433d-9c9d-a1b5a3d8b9f1-view.webp",
+    "thumbnail": "/data/library/import-6677979f-0212-433d-9c9d-a1b5a3d8b9f1-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "6677979f-0212-433d-9c9d-a1b5a3d8b9f1",
+    "warmth": 2,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-b433fbef-efd5-45a7-af92-5bedc8ad01d2",
+    "name": "Black dress pants",
+    "part": "lowerbody",
+    "color": "#26262a",
+    "secondaryColor": null,
+    "palette": [
+      "#26262a"
+    ],
+    "tags": [
+      "trousers",
+      "dress-pants"
+    ],
+    "image": "/data/library/import-b433fbef-efd5-45a7-af92-5bedc8ad01d2-view.webp",
+    "thumbnail": "/data/library/import-b433fbef-efd5-45a7-af92-5bedc8ad01d2-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "b433fbef-efd5-45a7-af92-5bedc8ad01d2",
+    "warmth": 3,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-e5760458-670c-4382-a20c-00ae090c6cbb",
+    "name": "White ribbed crew socks (red embroidered coordinates)",
+    "part": "socks",
+    "color": "#f0eee9",
+    "secondaryColor": "#c8384a",
+    "palette": [
+      "#f0eee9",
+      "#c8384a"
+    ],
+    "tags": [
+      "socks",
+      "crew",
+      "embroidered"
+    ],
+    "image": "/data/library/import-e5760458-670c-4382-a20c-00ae090c6cbb-view.webp",
+    "thumbnail": "/data/library/import-e5760458-670c-4382-a20c-00ae090c6cbb-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "e5760458-670c-4382-a20c-00ae090c6cbb",
+    "warmth": 1,
+    "occasions": [
+      "school",
+      "out",
+      "sport"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-47d9abaf-d6c9-4531-96f1-dbb801789d03",
+    "name": "Black leather chunky-sole casual shoes (TOD'S)",
+    "part": "shoes",
+    "color": "#1a1a1a",
+    "secondaryColor": null,
+    "palette": [
+      "#1a1a1a"
+    ],
+    "tags": [
+      "sneakers",
+      "leather",
+      "black",
+      "tods",
+      "chunky"
+    ],
+    "image": "/data/library/import-47d9abaf-d6c9-4531-96f1-dbb801789d03-view.webp",
+    "thumbnail": "/data/library/import-47d9abaf-d6c9-4531-96f1-dbb801789d03-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "47d9abaf-d6c9-4531-96f1-dbb801789d03",
+    "warmth": 2,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": false
+  },
+  {
+    "id": "import-9a5fc2a3-c5c0-4220-b018-cb4a974c09a5",
+    "name": "Gray-purple technical retro running shoes (New Balance 1000)",
+    "part": "shoes",
+    "color": "#6a6068",
+    "secondaryColor": "#b0aab2",
+    "palette": [
+      "#6a6068",
+      "#b0aab2"
+    ],
+    "tags": [
+      "sneakers",
+      "running",
+      "retro",
+      "grey",
+      "new balance"
+    ],
+    "image": "/data/library/import-9a5fc2a3-c5c0-4220-b018-cb4a974c09a5-view.webp",
+    "thumbnail": "/data/library/import-9a5fc2a3-c5c0-4220-b018-cb4a974c09a5-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "9a5fc2a3-c5c0-4220-b018-cb4a974c09a5",
+    "warmth": 2,
+    "occasions": [
+      "school",
+      "out",
+      "sport"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-719b4862-b21c-4137-85e4-b9d61ac0fa22",
+    "name": "Off-white canvas side-zip high-top sneakers",
+    "part": "shoes",
+    "color": "#e3d9c8",
+    "secondaryColor": null,
+    "palette": [
+      "#e3d9c8"
+    ],
+    "tags": [
+      "sneakers",
+      "hightop",
+      "canvas",
+      "cream",
+      "zip"
+    ],
+    "image": "/data/library/import-719b4862-b21c-4137-85e4-b9d61ac0fa22-view.webp",
+    "thumbnail": "/data/library/import-719b4862-b21c-4137-85e4-b9d61ac0fa22-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "719b4862-b21c-4137-85e4-b9d61ac0fa22",
+    "warmth": 2,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": false
+  },
+  {
+    "id": "import-240d1da5-04de-4f2d-aa5f-b742454a3b6d",
+    "name": "Black nylon and leather sling waist bag",
+    "part": "bag",
+    "color": "#17171a",
+    "secondaryColor": null,
+    "palette": [
+      "#17171a"
+    ],
+    "tags": [
+      "sling",
+      "waist bag",
+      "nylon",
+      "leather",
+      "black"
+    ],
+    "image": "/data/library/import-240d1da5-04de-4f2d-aa5f-b742454a3b6d-view.webp",
+    "thumbnail": "/data/library/import-240d1da5-04de-4f2d-aa5f-b742454a3b6d-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "240d1da5-04de-4f2d-aa5f-b742454a3b6d",
+    "warmth": 1,
+    "occasions": [
+      "school",
+      "out",
+      "sport"
+    ],
+    "rainOk": true
+  },
+  {
+    "id": "import-0f200539-74a5-4378-bd43-37c213e3efd3",
+    "name": "Black nylon laptop backpack (Samsonite)",
+    "part": "bag",
+    "color": "#1a1a1c",
+    "secondaryColor": null,
+    "palette": [
+      "#1a1a1c"
+    ],
+    "tags": [
+      "backpack",
+      "laptop",
+      "nylon",
+      "black",
+      "samsonite"
+    ],
+    "image": "/data/library/import-0f200539-74a5-4378-bd43-37c213e3efd3-view.webp",
+    "thumbnail": "/data/library/import-0f200539-74a5-4378-bd43-37c213e3efd3-thumb.webp",
+    "modeledImage": null,
+    "importJobId": "0f200539-74a5-4378-bd43-37c213e3efd3",
+    "warmth": 1,
+    "occasions": [
+      "school",
+      "out"
+    ],
+    "rainOk": true
+  }
+]

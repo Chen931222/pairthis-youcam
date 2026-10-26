@@ -5,7 +5,9 @@ dist/
 .env
 .env.*
 *.log
-data/
+# [參賽版修改 2026-10-26] data/ 進版控:參賽版的 data/ 只有示範 20 件(library.json + 40 張 webp,約 4.6MB),
+# 沒有站主的衣櫃和 .publish-secret。比賽規定 repo 要附「能跑起來需要的所有素材」;沒有它 clone 下來是空衣櫃
+data/.publish-secret
 photos/
 work/
 wardrobe-gallery/
@@ -24,4 +26,5 @@ _insp.mjs
 # 參賽版的匯出(tools/export-static.mjs)與本機筆記
 contest-site/
 project.md
+devpost-submission.md
 .claude/
