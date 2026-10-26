@@ -17,7 +17,7 @@ A closet app that dresses you from the clothes you already own. For the YouCam A
 
 | Step | Where | What happens |
 |---|---|---|
-| Your photo | `src/tryon.js` `preparePhoto` | Scaled to a 1280 px long side, JPEG, rejected below 512×384 (YouCam's minimum). Stored in IndexedDB on the device. |
+| Your photo | `src/tryon.js` `preparePhoto` | Scaled down to at most 1280 px on the long side, JPEG, rejected below 512×384 (YouCam's minimum). Stored in IndexedDB on the device. |
 | The garment | `src/tryon.js` `prepareGarment` | The transparent cutout is placed on a white 960×1280 canvas at 86 % and saved as JPEG, since YouCam takes JPG/PNG product shots. |
 | Start | `functions/tryon.mjs` → `functions/_tryon-core.mjs` `startTryOn` | The server uploads both images (`POST /s2s/v2.0/file`, then a PUT to the returned URL), then starts `POST /s2s/v2.0/task/cloth-v4` with `garment_category` `upper_body` (tops) or `outer` (outerwear). |
 | Wait | `checkTryOn` | The page polls every few seconds. The server answers only to a ticket it signed (`task.expiry.HMAC`), so a bare YouCam task id can't fetch someone else's photo. |
