@@ -62,10 +62,19 @@ The app existed before the submission period, which started on 2026-09-29. Only 
 
 No account, no cookies, no ads, no usage stats in this contest version. Weather comes from Open-Meteo; background removal runs on your device; the try-on photo goes to YouCam only when you ask for it. Details are in [public/privacy.html](public/privacy.html).
 
-## Credits and licenses
+## License
 
-- Forked from [Open Wardrobe](https://github.com/tandpfun/wardrobe) (MIT); this repository keeps its MIT license ([LICENSE](LICENSE)).
-- Background removal: [@imgly/background-removal](https://github.com/imgly/background-removal-js), AGPL-3.0, runs in the browser.
-- Virtual try-on: YouCam AI Clothes API by Perfect Corp.
-- Weather data by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0).
-- Fonts: Cormorant and Noto Serif TC (SIL Open Font License).
+MIT ([LICENSE](LICENSE)): the original [Open Wardrobe](https://github.com/tandpfun/wardrobe) code, which is MIT licensed, plus the PairThis changes.
+
+## Third-party licenses
+
+| Component | License | Where it's used |
+|---|---|---|
+| [@imgly/background-removal](https://github.com/imgly/background-removal-js) | **AGPL-3.0** ([license](https://github.com/imgly/background-removal-js/blob/main/LICENSE.md)) | In the browser, to remove backgrounds on your device |
+| @imgly/background-removal-node | AGPL-3.0 (same [license](https://github.com/imgly/background-removal-js/blob/main/LICENSE.md)) | Only in the offline scripts under `tools/`, not on the site |
+| [Open Wardrobe](https://github.com/tandpfun/wardrobe) | MIT | The project this one was forked from |
+| Cormorant, Noto Serif TC | SIL Open Font License 1.1 | Fonts |
+| [Open-Meteo](https://open-meteo.com/) weather data | CC BY 4.0 | Weather for today's pick |
+| YouCam AI Clothes API | Perfect Corp. API terms | The try-on, called from the server |
+
+The site sends @imgly/background-removal to the browser. AGPL-3.0 asks that people who use the site can get its full source code; this public repository is that source.
