@@ -39,7 +39,7 @@ function readTicket(key, ticket) {
 
 // 每個 IP 一天最多開幾次試穿、全站(這一台 function)一天最多幾次。記在記憶體,Vercel 開好幾台時各算各的,
 // 跟 _rate-limit.mjs 一樣是擋大量亂打;真正的天花板是帳戶裡的點數
-const PER_IP_DAY = 15;
+const PER_IP_DAY = 40;   // [參賽版修改 2026-10-26] 15→40:評審多半在同一間公司、同一個對外網址,15 次是全部人加起來(驗收抓到)
 const PER_INSTANCE_DAY = 150;
 const daily = new Map();
 let dayKey = "";
@@ -148,6 +148,8 @@ export async function checkTryOn(request, key) {
 /** YouCam 的錯誤碼原樣回給網頁(網頁翻成一句話),其他錯誤只回 502 */
 export function tryOnFailure(error) {
   if (error?.status === 401) return json(502, { error: "InvalidAccessToken" });
+  // 點數用完:YouCam 文件沒寫錯誤碼(2026-10-26 查 FAQ),402 和帶 credit／unit 字樣的都當成點數用完
+  if (error?.status === 402 || /credit|unit|insufficient|quota/i.test(error?.code || "")) return json(502, { error: "out_of_units" });
   if (error?.code) return json(502, { error: error.code });
   return json(502, { error: "upstream" });
 }

@@ -68,22 +68,36 @@ export async function deletePhoto() {
 }
 
 const resultKey = (photoId, garmentKey) => `${photoId}|${garmentKey}`;
+// 還在等的 task 另存一格(2026-10-26 驗收抓到:「再試穿一次」先把 task 寫進同一格,舊的試穿照就被蓋掉,新的失敗連舊的也沒了)
+const pendingKey = (photoId, garmentKey) => `${resultKey(photoId, garmentKey)}|pending`;
+const fresh = (record) => record?.task && Date.now() - record.startedAt < 23 * 3600 * 1000;   // YouCam 的 task 只留 24 小時
 
-/** 一件衣服在這張照片上的紀錄:{ blob } 試好了、{ task, startedAt } 還在等、null 沒試過 */
+/** 一件衣服在這張照片上的紀錄:{ task, startedAt } 還在等(優先)、{ blob } 試好了、null 沒試過 */
 export async function readResult(photoId, garmentKey) {
+  const pending = await run("results", "readonly", (store) => store.get(pendingKey(photoId, garmentKey))).catch(() => null);
+  if (fresh(pending)) return { task: pending.task, startedAt: pending.startedAt };
   const record = await run("results", "readonly", (store) => store.get(resultKey(photoId, garmentKey))).catch(() => null);
   if (!record) return null;
   if (record.bytes) return { blob: toBlob(record), createdAt: record.createdAt };
-  if (record.task && Date.now() - record.startedAt < 23 * 3600 * 1000) return { task: record.task, startedAt: record.startedAt };
-  return null;   // YouCam 的 task 只留 24 小時
+  if (fresh(record)) return { task: record.task, startedAt: record.startedAt };   // 改版前存的等待中紀錄
+  return null;
 }
 
 async function writeResult(photoId, garmentKey, value) {
   await putRecord("results", resultKey(photoId, garmentKey), value);
 }
 
+async function writePending(photoId, garmentKey, value) {
+  await putRecord("results", pendingKey(photoId, garmentKey), value);
+}
+
+async function forgetPending(photoId, garmentKey) {
+  await run("results", "readwrite", (store) => store.delete(pendingKey(photoId, garmentKey)));
+}
+
 export async function forgetResult(photoId, garmentKey) {
   await run("results", "readwrite", (store) => store.delete(resultKey(photoId, garmentKey)));
+  await forgetPending(photoId, garmentKey);
 }
 
 function loadImage(src) {
@@ -148,22 +162,23 @@ export async function prepareGarment(src) {
 export function tryOnMessage(code) {
   switch (code) {
     case "photo_small":
-    case "error_below_min_image_size": return "照片太小了,至少要 512×384。換一張大一點的。";
+    case "error_below_min_image_size": return "That photo is too small. It needs to be at least 512×384. Try a bigger one.";
     case "error_pose":
-    case "error_invalid_src": return "這張照片認不出姿勢。要一個人正面站好、胸部以上入鏡,看得到肩膀和整張臉。換一張再試。";
-    case "error_multi_person": return "照片裡不只一個人。換一張只有你的。";
+    case "error_invalid_src": return "Couldn't find a pose in this photo. It needs one person facing the camera, chest up, with shoulders and the whole face in view. Try another photo.";
+    case "error_multi_person": return "There's more than one person in the photo. Use one with just you.";
     case "error_invalid_ref":
-    case "error_apply_region_mismatch": return "這件的圖認不出是哪一種衣服。換一張正面、整件攤平的圖再試。";
-    case "error_nsfw_content_detected": return "這張照片被擋下來了。換一張再試。";
-    case "exceed_max_filesize": return "照片太大了。換一張再試。";
-    case "daily_limit": return "這台今天的試穿次數用完了(一天 15 次),明天再來。";
-    case "site_busy": return "今天試穿的人太多,試穿先停到明天。";
-    case "rate": return "按得太快了,等一分鐘再試。";
-    case "timeout": return "等了兩分鐘還沒好。先關掉,晚點再打開這件,好了會直接出現。";
+    case "error_apply_region_mismatch": return "Couldn't tell what kind of garment this is. Try an image of the whole piece, front view, laid flat.";
+    case "error_nsfw_content_detected": return "This photo was blocked. Try another one.";
+    case "exceed_max_filesize": return "That photo is too large. Try another one.";
+    case "daily_limit": return "Today's try-ons from this internet connection are used up (40 a day). Come back tomorrow.";
+    case "site_busy": return "Too many try-ons today. Try-on is paused until tomorrow.";
+    case "rate": return "That was too fast. Wait a minute and try again.";
+    case "timeout": return "Still not ready after two minutes. Close this for now; open this piece again later and the result will be there once it's done.";
     case "not_configured":
-    case "InvalidAccessToken": return "試穿現在接不上(網站這邊的設定有問題),不是你的照片的問題。";
-    case "network": return "連不上網路。網路好了再試一次。";
-    default: return `試穿沒有成功${code ? `(${code})` : ""}。等一下再試一次。`;
+    case "InvalidAccessToken": return "Try-on isn't available right now (a setup problem on our side). It's not your photo.";
+    case "out_of_units": return "Try-on is paused: this demo has used up its YouCam units. It's not your photo.";
+    case "network": return "No connection. Try again when you're back online.";
+    default: return `The try-on didn't work${code ? ` (${code})` : ""}. Try again in a moment.`;
   }
 }
 
@@ -176,7 +191,8 @@ async function api(url, options) {
   try {
     response = await fetch(url, { cache: "no-store", ...options });
   } catch {
-    throw new TryOnError("network");
+    // 按「Stop waiting」時 fetch 會被中斷:那不是斷線,不要蓋掉 idle(驗收抓到)
+    throw new TryOnError(options?.signal?.aborted ? "aborted" : "network");
   }
   const body = await response.json().catch(() => ({}));
   if (response.status === 429 && !body.error?.startsWith?.("daily") && body.error !== "site_busy") throw new TryOnError("rate");
@@ -197,12 +213,13 @@ export async function awaitTryOn({ photoId, garmentKey, task, signal, onTick }) 
     onTick?.(Date.now() - started);
     const body = await api(`/api/tryon?task=${encodeURIComponent(task)}`, { signal });
     if (body.status === "error") {
-      await forgetResult(photoId, garmentKey).catch(() => {});
+      await forgetPending(photoId, garmentKey).catch(() => {});
       throw new TryOnError(body.error || "error");
     }
     if (body.status === "done" && body.image) {
       const blob = await (await fetch(body.image)).blob();
       await writeResult(photoId, garmentKey, { ...(await toRecord(blob)), createdAt: Date.now() });
+      await forgetPending(photoId, garmentKey).catch(() => {});
       return blob;
     }
   }
@@ -221,6 +238,6 @@ export async function startTryOn({ photo, garmentSrc, garmentKey, part, signal, 
     body: JSON.stringify({ person, garment: ref, category }),
     signal,
   });
-  await writeResult(photo.id, garmentKey, { task, startedAt: Date.now() });
+  await writePending(photo.id, garmentKey, { task, startedAt: Date.now() });
   return awaitTryOn({ photoId: photo.id, garmentKey, task, signal, onTick });
 }

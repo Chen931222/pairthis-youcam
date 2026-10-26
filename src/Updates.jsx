@@ -15,11 +15,11 @@ export function UpdatesSheet({ onClose }) {
     <>
       <div className="add-overlay" role="dialog" aria-modal="true" aria-labelledby="updates-title" ref={ref} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
         <div className="sync-sheet updates-sheet">
-          <button type="button" className="add-close" onClick={onClose} aria-label="關閉">
+          <button type="button" className="add-close" onClick={onClose} aria-label="Close">
             <X size={20} weight="light" aria-hidden="true" />
           </button>
-          <h2 id="updates-title">更新</h2>
-          <p className="updates-lede">最近改了什麼,新的在上面。{year} 年。</p>
+          <h2 id="updates-title">Updates</h2>
+          <p className="updates-lede">What changed recently, newest first. {year}.</p>
           <ol className="updates-list">
             {UPDATES.map((update) => (
               <li key={`${update.date}#${update.title}`}>
@@ -33,7 +33,7 @@ export function UpdatesSheet({ onClose }) {
               </li>
             ))}
           </ol>
-          <p className="updates-foot"><a href="/privacy.html">隱私與使用說明</a> · 資料存在哪、會連到哪些服務、怎麼刪掉</p>
+          <p className="updates-foot"><a href="/privacy.html">Privacy and how it works</a> · where your data lives, which services it connects to, how to delete it</p>
         </div>
       </div>
       <ScrollRail target={ref} />

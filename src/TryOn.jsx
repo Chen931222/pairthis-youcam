@@ -140,7 +140,7 @@ function PhotoPicker({ label, onError, className = "secondary-button" }) {
   return (
     <>
       <button type="button" className={className} onClick={() => inputRef.current?.click()} disabled={busy}>
-        <Camera size={15} weight="regular" aria-hidden="true" /> {busy ? "讀照片…" : label}
+        <Camera size={15} weight="regular" aria-hidden="true" /> {busy ? "Reading photo…" : label}
       </button>
       <input ref={inputRef} type="file" accept="image/*" hidden onChange={pick} />
     </>
@@ -157,49 +157,49 @@ export function TryOnPanel({ state, compact = false }) {
 
   return (
     <section className={compact ? "tryon is-compact" : "tryon"} aria-labelledby={titleId}>
-      <h3 id={titleId}>穿在你身上 <span lang="en">Try it on you</span></h3>
+      <h3 id={titleId}>Try it on you</h3>
 
       {!photo ? (
         <>
-          <p className="tryon-lede">放一張你的照片,看這件穿在你身上的樣子。</p>
-          <p className="tryon-rule">胸部以上、正面站好,看得到肩膀和整張臉,照片裡只有你一個人。</p>
+          <p className="tryon-lede">Add a photo of yourself to see this piece on you.</p>
+          <p className="tryon-rule">Chest up, facing the camera, with your shoulders and whole face in view, and only you in the photo.</p>
           <div className="tryon-actions">
-            <PhotoPicker label="拍一張或選照片" onError={setPhotoError} />
+            <PhotoPicker label="Take or choose a photo" onError={setPhotoError} />
           </div>
         </>
       ) : (
         <>
           <div className="tryon-me">
-            <img src={photoUrl} alt="你放的照片" />
+            <img src={photoUrl} alt="Your photo" />
             <div className="tryon-me-text">
-              <p>用這張照片試穿。</p>
+              <p>Try-ons use this photo.</p>
               <div className="tryon-me-actions">
-                <PhotoPicker label="換照片" onError={setPhotoError} className="tryon-link" />
-                <button type="button" className="tryon-link" onClick={() => removePhoto().catch(() => {})}>刪掉照片</button>
+                <PhotoPicker label="Change photo" onError={setPhotoError} className="tryon-link" />
+                <button type="button" className="tryon-link" onClick={() => removePhoto().catch(() => {})}>Delete photo</button>
               </div>
             </div>
           </div>
 
           {status === "running" ? (
             <div className="tryon-status" role="status" aria-live="polite">
-              <p><SpinnerGap size={16} className="add-spinner" aria-hidden="true" /> 正在做試穿照… {seconds} 秒,通常要 20–40 秒。</p>
-              <button type="button" className="tryon-link" onClick={stopWaiting}>先不等了</button>
+              <p><SpinnerGap size={16} className="add-spinner" aria-hidden="true" /> Making your try-on… {seconds} s so far. In two test runs it was ready in under 20 seconds.</p>
+              <button type="button" className="tryon-link" onClick={stopWaiting}>Stop waiting</button>
             </div>
           ) : status === "done" ? (
             <div className="tryon-done" role="status">
-              <p>試穿照在{compact ? "下面" : "最上面"}。這是 AI 做出來的,顏色、長度和版型跟真的穿上可能不一樣。</p>
-              {compact && resultUrl && <img className="tryon-result" src={resultUrl} alt="你穿著這件的試穿照(AI 產生)" />}
+              <p>The try-on photo is {compact ? "below" : "at the top"}. It's made by AI: color, length and fit may differ from the real thing on you.</p>
+              {compact && resultUrl && <img className="tryon-result" src={resultUrl} alt="You wearing this piece (AI-generated try-on)" />}
               <div className="tryon-actions">
                 <button type="button" className="secondary-button" onClick={retry}>
-                  <Sparkle size={15} weight="regular" aria-hidden="true" /> 再試穿一次
+                  <Sparkle size={15} weight="regular" aria-hidden="true" /> Try on again
                 </button>
-                <button type="button" className="tryon-link" onClick={discard}>刪掉這張試穿照</button>
+                <button type="button" className="tryon-link" onClick={discard}>Delete this try-on</button>
               </div>
             </div>
           ) : (
             <div className="tryon-actions">
               <button type="button" className="secondary-button tryon-go" onClick={tryOn}>
-                <Sparkle size={15} weight="regular" aria-hidden="true" /> 試穿這件
+                <Sparkle size={15} weight="regular" aria-hidden="true" /> Try this on
               </button>
             </div>
           )}
@@ -209,7 +209,7 @@ export function TryOnPanel({ state, compact = false }) {
 
       {photoError && <p className="tryon-error" role="alert">{photoError}</p>}
       <p className="tryon-privacy">
-        照片只存在這台裝置。按「試穿這件」時,照片和這件衣服的圖會傳到 YouCam(玩美移動)做試穿照,做好的照片存回這台。一台一天最多試穿 15 次。
+       Your photo stays on this device. When you tap “Try this on”, your photo and this piece's image are sent to YouCam (Perfect Corp.) to make the try-on, and the result is saved back here. Up to 40 try-ons a day from the same internet connection.
       </p>
     </section>
   );

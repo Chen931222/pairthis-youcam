@@ -3,6 +3,15 @@
 @import "@fontsource/cormorant/500.css";
 @import "@fontsource/noto-serif-tc/400.css";
 
+/* 參賽版是英文(2026-10-26):Noto Serif TC 的中文字檔也收了“ ”‘ ’…–—,而且是全形,
+   英文句子裡會變成「“Try this on” ,」前後各空一大格。只有這幾個標點改用系統的西文襯線字;
+   一個都找不到(例如 Android 沒有 Georgia)就照舊落回 Noto Serif TC */
+@font-face {
+  font-family: "Latin Punctuation";
+  src: local("Georgia"), local("Times New Roman"), local("Noto Serif"), local("DejaVu Serif");
+  unicode-range: U+2013-2014, U+2018-201F, U+2026;
+}
+
 /* 配色來源:使用者自己衣櫃的實拍照 + 書櫃站的編輯部暗色語言(2026-07-23 指定改暗)。
    深色 = 預設。錨定使用者自己的書櫃站(底 #141310、字 #F2ECE0)—— 近黑暖木配奶油襯線,
    走印刷/編輯部質感,不是又暗又發光的科技風。
@@ -45,7 +54,7 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --font-display: "Cormorant", "Noto Serif TC", Georgia, serif;
-  --font-body: "Noto Serif TC", Georgia, "Times New Roman", serif;
+  --font-body: "Latin Punctuation", "Noto Serif TC", Georgia, "Times New Roman", serif;
 
   font-family: var(--font-body);
   color: var(--body);
@@ -292,6 +301,9 @@ h1, h2, h3 {
   letter-spacing: .14em;
   color: var(--muted);
 }
+/* 參賽版是英文(2026-10-26):分組名「Accessories」比兩個中文字長,3em 的欄放不下會壓到後面的「Bags」 */
+.closet-index-row { grid-template-columns: 6.2em 1fr; }
+.closet-index-group { letter-spacing: .08em; }
 .closet-index-items { display: flex; flex-wrap: wrap; column-gap: 24px; }
 /* 品牌那行:品牌多的時候先列幾個,「其他 N 個」展開 */
 .closet-index button.closet-index-more { color: var(--muted); font-size: 13px; }
@@ -2181,6 +2193,7 @@ h1, h2, h3 {
   text-align: center;
 }
 .studio-daily-weather { margin: 0; font-size: 13px; color: var(--ink); letter-spacing: .03em; }
+.studio-daily-weather { text-wrap: balance; }   /* 參賽版英文:天氣那行比中文長,只剩「4%」掉到第二行 */
 /* 理由一句一行(舊版全「·」串成一坨,手機七行擠一起難讀) */
 .studio-daily-reasons {
   list-style: none;
@@ -3113,6 +3126,8 @@ h1, h2, h3 {
 .story-weather .story-inner { grid-template-columns: var(--media-w) minmax(0, 1fr); grid-template-areas: "media no" "media text" "media notes"; grid-template-rows: auto auto 1fr; }
 /* 03:編號、字一整排,下面前後對照 */
 .story-talk .story-inner { grid-template-columns: minmax(0, 1fr); grid-template-areas: "no" "text" "pair"; }
+/* 參賽版 03 改講試穿(2026-10-26):跟 01 同一個版式,字左、手機截圖右 */
+.story-tryon .story-inner { grid-template-columns: minmax(0, 1fr) var(--media-w); grid-template-areas: "no media" "text media"; grid-template-rows: auto 1fr; }
 .welcome .story-text h3 {
   margin: 0; font-family: var(--font-body); font-weight: 400;
   font-size: clamp(30px, 3.4vw, 46px); line-height: 1.35; letter-spacing: .03em; color: var(--ink); text-wrap: balance;
@@ -3195,6 +3210,11 @@ h1, h2, h3 {
   color: var(--ink);
 }
 .welcome-lede span { display: block; }
+/* 參賽版是英文(2026-10-26):英文一個逗號一行在手機上放不下,斷成「own,」「weather,」單字掉一行。
+   改成照字自然換行、行長平均;英文字母不放字距(那是給中文的) */
+.welcome .welcome-lede { letter-spacing: 0; text-wrap: balance; }
+.welcome-lede span { display: inline; }
+.welcome .story-text h3 { letter-spacing: 0; }
 
 /* 按鈕緊貼標題(36px),先講清楚的事跟它拉開(56px):按鈕跟標題那句是一組,說明是另一組。
    標題下那三句 2026-10-24 拿掉(01、02 章講同一件事),按鈕直接接在標題後面 */
@@ -3278,7 +3298,7 @@ h1, h2, h3 {
   /* 手機:一章一章疊:編號 → 字 → 影片(寬 220 置中)→ 理由／前後對照;粗線和米紙帶照舊 */
   .welcome-story { margin-top: 48px; }
   .story-step, .story-intro { padding: 56px 0; }
-  .story-inner, .story-add .story-inner, .story-weather .story-inner, .story-talk .story-inner, .story-intro .story-inner {
+  .story-inner, .story-add .story-inner, .story-weather .story-inner, .story-talk .story-inner, .story-tryon .story-inner, .story-intro .story-inner {
     width: auto; margin: 0 18px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "no" "text" "media" "notes" "pair"; row-gap: 0;
   }
   .story-no { margin-bottom: 18px; font-size: 56px; }

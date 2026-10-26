@@ -7,13 +7,13 @@ import { colorLabel, colorScore, recommendOutfit } from "./recommend.js";
    兩件都認得出款式、款式又不同,就不算像(白 T 跟白襯衫不是同一件事)。 */
 const KINDS = {
   upperbody: [
-    ["襯衫", /襯衫/], ["帽T", /帽T|連帽/], ["衛衣", /衛衣|大學T/], ["背心", /背心/], ["Polo 衫", /polo/i],
-    ["針織", /毛衣|針織|開襟/], ["長袖", /長袖/], ["T恤", /T恤|短袖|素T|\bT\b|五分袖/],
+    ["shirt", /襯衫|(?<![\w-])(?<!\b(?:t|tee|polo|sweat|rugby|baseball)\s)shirt\b|button-?(up|down)|oxford/i], ["hoodie", /帽T|連帽|hoodie|hooded/i], ["sweatshirt", /衛衣|大學T|sweat[- ]?shirt/i], ["tank top", /背心|tank|sleeveless/i], ["polo", /polo/i],
+    ["knit", /毛衣|針織|開襟|sweater|knit|cardigan/i], ["long sleeve", /長袖|long[- ]?sleeve/i], ["T-shirt", /T恤|短袖|素T|\bT\b|五分袖|[Tt][- ]?[Ss]hirt|\b[Tt]ee\b|[Ss]hort[- ]?[Ss]leeve/],
   ],
-  lowerbody: [["短褲", /短褲/], ["裙子", /裙/], ["牛仔褲", /牛仔|丹寧/], ["西裝褲", /西裝/], ["運動褲", /運動|棉褲/], ["長褲", /褲/]],
-  wholebody_up: [["球衣", /球衣/], ["西裝外套", /西裝/], ["大衣", /大衣|羽絨/], ["皮衣", /皮衣|騎士/], ["外套", /外套|夾克/]],
-  shoes: [["拖鞋", /拖|涼鞋/], ["靴子", /靴/], ["球鞋", /鞋/]],
-  bag: [["後背包", /後背/], ["側背包", /包/]],
+  lowerbody: [["shorts", /短褲|shorts/i], ["skirt", /裙|skirt/i], ["jeans", /牛仔|丹寧|jeans|denim/i], ["dress pants", /西裝|dress pants|slacks|suit pants/i], ["sweatpants", /運動|棉褲|sweatpants|joggers?|track pants/i], ["pants", /褲|pants|trousers|chinos?/i]],
+  wholebody_up: [["jersey", /球衣|jersey/i], ["blazer", /西裝|blazer|suit jacket/i], ["coat", /大衣|羽絨|overcoat|\bcoat\b|parka|puffer|down jacket/i], ["leather jacket", /皮衣|騎士|leather jacket|biker|moto/i], ["jacket", /外套|夾克|jacket|windbreaker|bomber|cardigan|shacket|overshirt/i]],
+  shoes: [["sandals", /拖|涼鞋|sandal|slide|flip-?flop/i], ["boots", /靴|boot/i], ["sneakers", /鞋|sneaker|shoe|trainer|runner/i]],
+  bag: [["backpack", /後背|backpack/i], ["shoulder bag", /包|bag|tote|crossbody|sling/i]],
 };
 
 function kindOf(item) {
@@ -24,9 +24,9 @@ function kindOf(item) {
 /* 版型,從品名和英文標籤猜。只有衣服、褲子、外套才分;兩件都認得出又不一樣,就不算像
    (寬版牛仔褲跟直筒牛仔褲穿起來是兩回事)。「鬆緊」是褲頭、「鬆餅」是布紋,都不算寬。 */
 const FITS = [
-  ["寬版", /寬|oversize|落肩|廓形|垂墜|baggy|wide-leg|relaxed/i],
-  ["直筒", /直筒|straight/i],
-  ["合身", /合身|修身|窄|緊身|錐形|束口|slim|skinny|tapered|jogger/i],
+  ["oversized", /寬|oversize|落肩|廓形|垂墜|baggy|wide-?leg|relaxed|loose/i],
+  ["straight", /直筒|straight/i],
+  ["slim", /合身|修身|窄|緊身|錐形|束口|slim|skinny|tapered|jogger/i],
 ];
 const FIT_PARTS = ["upperbody", "lowerbody", "wholebody_up"];
 
@@ -83,7 +83,7 @@ function looseGap(a, b) {
 
 /* 花紋:條紋、格紋跟素面不算同一件。主色再接近,條紋衣跟素色 T 恤也不是重複買(審查 F20)。
    品名沒寫花紋的當素面,所以兩件只要一件有花紋、或花紋不同,就不算像。 */
-const PATTERNS = [["條紋", /條紋|直紋|橫紋|stripe|pinstripe/i], ["格紋", /格紋|格子|plaid|check|tartan|千鳥/i], ["迷彩", /迷彩|camo/i]];
+const PATTERNS = [["striped", /條紋|直紋|橫紋|stripe|pinstripe/i], ["plaid", /格紋|格子|plaid|check|tartan|千鳥/i], ["camo", /迷彩|camo/i]];
 function patternOf(item) {
   const text = `${item.name || ""} ${(item.tags || []).join(" ")}`;
   for (const [pattern, regex] of PATTERNS) if (regex.test(text)) return pattern;
@@ -124,28 +124,28 @@ export function findSimilar(wish, owned, { loose = false } = {}) {
    加了這些,站主 104 件裡跳出候選的從 38 件降到 0 件(2026-10-08 實測);寧可漏掉,也不要叫人把兩件不同的衣服併在一起。
    漏掉的話,單品頁一樣可以自己把數量 +1、把另一張刪掉。 */
 const DETAILS = [
-  ["印花", /印花|圖案|graphic|print|logo|字樣|三葉草|串標|貼布|魷魚|slytherin|padres|nationals/i],
-  ["刺繡", /刺繡|embroider/i],
-  ["亨利領", /亨利領|henley/i],
-  ["立領", /立領|高領|mock ?neck|turtle/i],
-  ["V領", /V領|v-?neck/i],
-  ["翻領", /翻領|扣領|collar|button-?(up|down)/i],
-  ["連帽", /連帽|帽T|hood/i],
-  ["拉鍊", /拉鍊|zip/i],
-  ["口袋", /口袋|pocket|cargo|工裝/i],
-  ["五分袖", /五分袖|half-?sleeve/i],
-  ["長袖", /長袖|long-?sleeve|longsleeve/i],
-  ["丹寧", /丹寧|牛仔|denim|jeans/i],
-  ["水洗做舊", /水洗|做舊|刷破|破損|酸洗|washed|distressed|vintage/i],
-  ["撞色", /撞色|車線|contrast/i],
-  ["針織", /針織|毛衣|knit|sweater/i],
-  ["尼龍", /尼龍|nylon/i],
-  ["麂皮", /麂皮|suede/i],
-  ["皮革", /皮革|真皮|leather/i],
-  ["帆布", /帆布|canvas/i],
-  ["燈芯絨", /燈芯絨|corduroy/i],
-  ["斜紋", /斜紋|twill/i],
-  ["鬆餅紋", /鬆餅|waffle/i],
+  ["print", /印花|圖案|graphic|print|logo|字樣|三葉草|串標|貼布|魷魚|slytherin|padres|nationals/i],
+  ["embroidered", /刺繡|embroider/i],
+  ["henley", /亨利領|henley/i],
+  ["mock neck", /立領|高領|mock ?neck|turtle/i],
+  ["V-neck", /V領|v-?neck/i],
+  ["collar", /翻領|扣領|collar|button-?(up|down)/i],
+  ["hood", /連帽|帽T|hood/i],
+  ["zip", /拉鍊|zip/i],
+  ["pockets", /口袋|pocket|cargo|工裝/i],
+  ["half sleeve", /五分袖|half-?sleeve/i],
+  ["long sleeve", /長袖|long[- ]?sleeve/i],
+  ["denim", /丹寧|牛仔|denim|jeans/i],
+  ["washed", /水洗|做舊|刷破|破損|酸洗|washed|distressed|vintage/i],
+  ["contrast", /撞色|車線|contrast/i],
+  ["knit", /針織|毛衣|knit|sweater/i],
+  ["nylon", /尼龍|nylon/i],
+  ["suede", /麂皮|suede/i],
+  ["leather", /皮革|真皮|leather/i],
+  ["canvas", /帆布|canvas/i],
+  ["corduroy", /燈芯絨|corduroy/i],
+  ["twill", /斜紋|twill/i],
+  ["waffle", /鬆餅|waffle/i],
 ];
 function detailsOf(item) {
   const text = `${item.name || ""} ${(item.tags || []).join(" ")}`;
@@ -194,7 +194,7 @@ export function findSameStyle(item, owned, options) {
 }
 
 export function kindLabel(item) {
-  return kindOf(item) || { upperbody: "上衣", lowerbody: "下身", wholebody_up: "外套", shoes: "鞋", bag: "包", socks: "襪子", eyewear: "眼鏡", wrist: "錶", belt: "皮帶", necklace: "項鍊", ring: "戒指", accessories_up: "配件", carry: "小物" }[item.part] || "單品";
+  return kindOf(item) || { upperbody: "top", lowerbody: "bottoms", wholebody_up: "jacket", shoes: "shoes", bag: "bag", socks: "socks", eyewear: "eyewear", wrist: "watch", belt: "belt", necklace: "necklace", ring: "ring", accessories_up: "accessory", carry: "small item" }[item.part] || "piece";
 }
 
 /* 自己加的衣服(想買的、按了「已經買了」的)沒有保暖度(那是離線流程替衣櫃補的),從品名猜。1 最薄、5 最厚,跟衣櫃同一把尺。 */
@@ -202,18 +202,18 @@ export function guessWarmth(item) {
   const name = item.name || "";
   switch (item.part) {
     case "wholebody_up":
-      if (/羽絨|大衣|皮衣|騎士|羊毛/.test(name)) return 5;
-      if (/球衣|罩衫|防風|襯衫式/.test(name)) return 2;
+      if (/羽絨|大衣|皮衣|騎士|羊毛|down jacket|puffer|parka|overcoat|wool|leather jacket|biker|shearling/i.test(name)) return 5;
+      if (/球衣|罩衫|防風|襯衫式|jersey|windbreaker|shell|shirt jacket|overshirt/i.test(name)) return 2;
       return 3;
     case "upperbody":
-      if (/毛衣|針織|毛絨|刷毛|法蘭絨/.test(name)) return 4;
-      if (/帽T|連帽|衛衣|大學T/.test(name)) return 3;
-      if (/長袖|襯衫/.test(name)) return 2;
+      if (/毛衣|針織|毛絨|刷毛|法蘭絨|sweater|knit|fleece|flannel|cardigan/i.test(name)) return 4;
+      if (/帽T|連帽|衛衣|大學T|hoodie|hooded|sweat[- ]?shirt/i.test(name)) return 3;
+      if (/長袖|襯衫|long[- ]?sleeve|(?<![\w-])(?<!\b(?:t|tee|polo|sweat|rugby|baseball)\s)shirt\b/i.test(name)) return 2;
       return 1;
     case "lowerbody":
-      return /短褲|短裙/.test(name) ? 1 : 3;
+      return /短褲|短裙|shorts|mini ?skirt/i.test(name) ? 1 : 3;
     case "shoes":
-      return /拖|涼鞋/.test(name) ? 1 : 2;
+      return /拖|涼鞋|sandal|slide|flip-?flop/i.test(name) ? 1 : 2;
     default:
       return 1;
   }

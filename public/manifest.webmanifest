@@ -1,7 +1,7 @@
 {
-  "name": "PairThis 搭這件",
+  "name": "PairThis",
   "short_name": "PairThis",
-  "description": "用你已有的衣服,照今天的天氣搭一套,告訴你為什麼。不用帳號,去背在你的裝置上算。",
+  "description": "From the clothes you already own: an outfit for today's weather, and why it works. No account; background removal runs on your device.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

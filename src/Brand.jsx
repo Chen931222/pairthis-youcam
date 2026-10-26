@@ -6,5 +6,5 @@
 
 /** 標誌:入口頂端、衣櫃和搭配頁左上、首頁圓環左上。圖裡的字是 PAIR THIS,中文名放在 aria-label 給讀螢幕的 */
 export function Logo({ className = "" }) {
-  return <span className={`logo ${className}`.trim()} role="img" aria-label="PairThis 搭這件" />;
+  return <span className={`logo ${className}`.trim()} role="img" aria-label="PairThis" />;
 }

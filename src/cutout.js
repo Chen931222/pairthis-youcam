@@ -20,18 +20,18 @@ let downloading = false;
 const onModelProgress = (key, current, total) => {
   if (!currentProgress) return;
   if (key === "retry") {   // 對比太低,拉開再算一次(cutoutFix.js 的 retryLowContrast)
-    currentProgress("衣服跟背景太像,拉高對比再算一次…", false);
+    currentProgress("The piece and the background look too alike. Raising the contrast and trying again…", false);
     return;
   }
   if (key.startsWith("fetch") && current < total) {
     downloading = true;
     // 「已經下載過」的記號不可靠:Safari 會把這麼大的快取清掉,隔天又要重抓。下載中就講明多大、建議 Wi-Fi
-    currentProgress(`下載去背模型 ${Math.round((current / total) * 100)}%(約 80MB,建議用 Wi-Fi)`, true);
+    currentProgress(`Downloading the background-removal model ${Math.round((current / total) * 100)}% (about 80 MB, Wi-Fi recommended)`, true);
   } else if (key.startsWith("fetch")) {
     // 下載到 100% 之後要算 7–9 秒,先講清楚接下來在做什麼(審查 F33)
-    currentProgress(downloading ? "模型下載好了,開始去背,約 10–20 秒…" : "去背中,約 10–20 秒…", false);
+    currentProgress(downloading ? "Model downloaded. Removing the background, about 10–20 seconds…" : "Removing the background, about 10–20 seconds…", false);
   } else {
-    currentProgress("去背中,約 10–20 秒…", false);
+    currentProgress("Removing the background, about 10–20 seconds…", false);
   }
 };
 
@@ -70,7 +70,7 @@ function inWorker(type, payload = {}) {
       worker = new Worker(new URL("./cutoutWorker.js", import.meta.url), { type: "module" });
     } catch (error) {
       dropWorker(String(error?.message || error));
-      return Promise.reject(new WorkerUnavailable("Worker 開不起來"));
+      return Promise.reject(new WorkerUnavailable("Couldn't start the worker"));
     }
     worker.onmessage = ({ data }) => {
       if (data.type === "progress") { onModelProgress(data.key, data.current, data.total); return; }
@@ -82,7 +82,7 @@ function inWorker(type, payload = {}) {
       else job.reject(new Error(data.message));
     };
     // 連 Worker 都起不來(舊 Safari 不支援 module Worker 之類):之後都回主執行緒算
-    worker.onerror = (event) => { event.preventDefault?.(); dropWorker(event.message || "Worker 起不來"); };
+    worker.onerror = (event) => { event.preventDefault?.(); dropWorker(event.message || "Couldn't start the worker"); };
   }
   const id = ++jobSeq;
   return new Promise((resolve, reject) => {
@@ -121,7 +121,7 @@ export async function removeBg(file, onProgress) {
   previousRun = new Promise((resolve) => { release = resolve; });
   pending += 1;
   try {
-    if (pending > 1) onProgress("上一張還在算,等它結束…", false);
+    if (pending > 1) onProgress("Still working on the last one. Waiting for it to finish…", false);
     await waitFor;
     downloading = false;
     currentProgress = onProgress;

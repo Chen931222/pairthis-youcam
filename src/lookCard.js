@@ -41,7 +41,7 @@ function loadImage(src) {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`圖片載不到:${src}`));
+    img.onerror = () => reject(new Error(`Couldn't load image: ${src}`));
     img.src = src;
   });
 }
@@ -158,20 +158,21 @@ function drawDoll(ctx, area, pieces, fits, slotStyle, theme) {
 /* ---------- 底部 caption ---------- */
 
 function wrapLines(ctx, text, maxWidth, maxLines) {
+  // 參賽版英文:有空白就照字換行,不要把「windbreaker」切成兩半(驗收抓到);中文照舊一個字一個字排
+  const units = /\s/.test(text) ? text.split(/(\s+)/).filter(Boolean) : [...text];
   const lines = [];
   let line = "";
-  for (const ch of text) {
-    const test = line + ch;
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line); line = ch;
-      if (lines.length === maxLines) break;
+  let cut = false;
+  for (const unit of units) {
+    const test = line + unit;
+    if (ctx.measureText(test).width > maxWidth && line.trim()) {
+      if (lines.length === maxLines - 1) { cut = true; break; }
+      lines.push(line.trimEnd());
+      line = unit.trimStart();
     } else line = test;
   }
-  if (lines.length < maxLines && line) lines.push(line);
-  if (lines.length === maxLines && (line.length || text.length > lines.join("").length)) {
-    lines[maxLines - 1] = lines[maxLines - 1].replace(/.{1}$/, "…");
-  }
-  return lines;
+  lines.push(cut ? `${line.trimEnd().replace(/.$/, "")}…` : line.trimEnd());
+  return lines.filter(Boolean);
 }
 
 function drawCaption(ctx, box, caption, theme) {
@@ -183,7 +184,7 @@ function drawCaption(ctx, box, caption, theme) {
   ctx.fillStyle = theme.ink;
   ctx.font = '600 44px "Cormorant", "Noto Serif TC", serif';
   if ("letterSpacing" in ctx) ctx.letterSpacing = "0.06em";
-  ctx.fillText(caption.title || "今日穿搭", box.x, y);
+  ctx.fillText(caption.title || "Today's outfit", box.x, y);
   if ("letterSpacing" in ctx) ctx.letterSpacing = "0.12em";
   ctx.font = '500 26px "Cormorant", serif';
   ctx.fillStyle = theme.muted;
@@ -211,7 +212,7 @@ function fitItems(ctx, items, maxWidth, maxLines) {
   const names = String(items).split(" · ").filter(Boolean);
   for (let k = names.length; k >= 1; k--) {
     const rest = names.length - k;
-    const text = names.slice(0, k).join(" · ") + (rest ? ` · 等 ${rest} 件` : "");
+    const text = names.slice(0, k).join(" · ") + (rest ? ` · and ${rest} more` : "");
     const lines = wrapLines(ctx, text, maxWidth, maxLines + 1);   // 多給一行,才能判斷有沒有超出
     if (lines.length <= maxLines) return lines;
   }
@@ -231,7 +232,7 @@ export async function renderLookCard({ style = "flatlay", outfit, fits = {}, slo
   const theme = readTheme();
   await ensureFonts();
   const entries = Object.entries(outfit).filter(([, item]) => item);
-  if (!entries.length) throw new Error("身上沒有衣服");
+  if (!entries.length) throw new Error("No clothes on the form");
   const pieces = await Promise.all(entries.map(async ([slot, item]) => ({ slot, item, img: await loadImage(await fullImageOf(item)) })));
 
   const canvas = document.createElement("canvas");

@@ -79,7 +79,7 @@ export function createZip(entries) {
 export const isZip = (bytes) => bytes.length > 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04;
 
 async function inflate(data) {
-  if (typeof DecompressionStream === "undefined") throw new Error("這個瀏覽器解不開壓縮過的 ZIP,請用原本匯出的那個檔");
+  if (typeof DecompressionStream === "undefined") throw new Error("This browser can't open a compressed ZIP. Use the file you originally exported.");
   const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
@@ -91,13 +91,13 @@ export async function readZip(bytes) {
   for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i -= 1) {
     if (view.getUint32(i, true) === 0x06054b50) { end = i; break; }
   }
-  if (end < 0) throw new Error("這個 ZIP 檔壞了");
+  if (end < 0) throw new Error("This ZIP file is damaged.");
   const count = view.getUint16(end + 10, true);
   let pointer = view.getUint32(end + 16, true);
   const decoder = new TextDecoder();
   const files = new Map();
   for (let n = 0; n < count; n += 1) {
-    if (view.getUint32(pointer, true) !== 0x02014b50) throw new Error("這個 ZIP 檔壞了");
+    if (view.getUint32(pointer, true) !== 0x02014b50) throw new Error("This ZIP file is damaged.");
     const method = view.getUint16(pointer + 10, true);
     const compressed = view.getUint32(pointer + 20, true);
     const nameLength = view.getUint16(pointer + 28, true);
@@ -112,7 +112,7 @@ export async function readZip(bytes) {
     if (!name.endsWith("/")) {
       if (method === 0) files.set(name, raw);
       else if (method === 8) files.set(name, await inflate(raw));
-      else throw new Error("這個 ZIP 用了不認得的壓縮方式");
+      else throw new Error("This ZIP uses a compression method we don't recognize.");
     }
     pointer += 46 + nameLength + extraLength + commentLength;
   }

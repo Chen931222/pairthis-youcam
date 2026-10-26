@@ -13,9 +13,9 @@ import { pairScore } from "./taste.js";
 const WEARLOG_KEY = "open-wardrobe-wearlog-v1";
 
 const WMO_DESC = {
-  0: "晴朗", 1: "大致晴朗", 2: "多雲", 3: "陰天", 45: "起霧", 48: "起霧",
-  51: "毛毛雨", 53: "毛毛雨", 55: "毛毛雨", 61: "小雨", 63: "中雨", 65: "大雨",
-  80: "陣雨", 81: "陣雨", 82: "強陣雨", 95: "雷雨", 96: "雷雨", 99: "雷雨",
+  0: "Clear", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast", 45: "Fog", 48: "Fog",
+  51: "Drizzle", 53: "Drizzle", 55: "Drizzle", 61: "Light rain", 63: "Rain", 65: "Heavy rain",
+  80: "Showers", 81: "Showers", 82: "Heavy showers", 95: "Thunderstorms", 96: "Thunderstorms", 99: "Thunderstorms",
 };
 
 // 同一個城市半小時內只抓一次:入口、搭配頁、歡迎畫面各自要天氣,不用各打一次
@@ -126,11 +126,11 @@ function needOuter(feelsLike, rainProb) {
 
 /** 使用者說的冷熱(warmthDelta)→ 標籤與理由共用的一句話,兩邊不再一個寫冷、一個寫涼。 */
 function warmthPhrase(delta) {
-  if (delta <= -9) return "當寒流來穿";
-  if (delta <= -6) return "當冷天穿";
-  if (delta < 0) return "當涼天穿";
-  if (delta >= 6) return "當大熱天穿";
-  if (delta > 0) return "當熱天穿";
+  if (delta <= -9) return "dressed for a cold snap";
+  if (delta <= -6) return "dressed for a cold day";
+  if (delta < 0) return "dressed for a cool day";
+  if (delta >= 6) return "dressed for a scorching day";
+  if (delta > 0) return "dressed for a hot day";
   return null;
 }
 
@@ -186,13 +186,13 @@ function isBaseColor(item) {
 /** 這件的顏色在配色裡扮演什麼:底色(跟什麼都搭)或重點色(一套裡只讓它有顏色)。
  *  條件跟 isBaseColor 一模一樣,只是多回一個理由給單品頁講(2026-10-08:顏色區塊改成講「這個顏色在搭配裡做什麼」)。 */
 export function colorRole(item) {
-  if (!item?.color) return { role: "base", why: "還沒有顏色" };
+  if (!item?.color) return { role: "base", why: "No color yet" };
   const { h, s, l } = hexToHsl(item.color);
-  if (isNeutral(item.color)) return { role: "base", why: "黑白灰" };
-  if (l < 0.26) return { role: "base", why: "很深的顏色" };
-  if (l > 0.78 && s < 0.6) return { role: "base", why: "很淺的顏色" };
-  if (/牛仔|丹寧|denim|jeans/.test(`${item.name || ""} ${(item.tags || []).join(" ")}`.toLowerCase())) return { role: "base", why: "丹寧" };
-  if (h >= 20 && h <= 65 && s < 0.42) return { role: "base", why: "低彩度的大地色" };
+  if (isNeutral(item.color)) return { role: "base", why: "Black, white or gray" };
+  if (l < 0.26) return { role: "base", why: "A very dark color" };
+  if (l > 0.78 && s < 0.6) return { role: "base", why: "A very light color" };
+  if (/牛仔|丹寧|denim|jeans/.test(`${item.name || ""} ${(item.tags || []).join(" ")}`.toLowerCase())) return { role: "base", why: "Denim" };
+  if (h >= 20 && h <= 65 && s < 0.42) return { role: "base", why: "A muted earth tone" };
   return { role: "accent", why: "" };
 }
 
@@ -204,7 +204,7 @@ export function colorScore(items) {
   }
   // 理由用穿搭的話講(2026-10-19 評論:「全中性色」「中性色打底一個主色」是規則的說法)。分數照舊
   if (accents.length <= 1) {
-    return { score: 2, label: accents.length ? `只有「${shortName(accentItems[0]?.name, 12)}」有顏色,其他低調色襯著它` : "整套都是百搭的低調色,顏色不會打架" };
+    return { score: 2, label: accents.length ? `Only “${shortName(accentItems[0]?.name)}” has color; the muted pieces set it off` : "All muted, easy colors, so nothing clashes" };
   }
   // 兩個以上主色:色相接近(同家族/鄰近 60°)可接受,差太遠扣分;其中一個顏色不飽和(霧霧的)就沒那麼衝
   let worst = 0, vivid = true;
@@ -215,15 +215,15 @@ export function colorScore(items) {
       if (diff > worst) { worst = diff; vivid = accents[i].s >= 0.4 && accents[j].s >= 0.4; }
     }
   }
-  if (worst < 60) return { score: 1, label: "幾個顏色是同一家族,看起來成套" };
-  return vivid ? { score: -3, label: "顏色可能打架" } : { score: -1.5, label: "顏色有點跳" };
+  if (worst < 60) return { score: 1, label: "The colors are from the same family, so it looks like a set" };
+  return vivid ? { score: -3, label: "The colors may clash" } : { score: -1.5, label: "The colors are a bit loud" };
 }
 
 /* ---------- 風格一致:同一套裡不要一半正式一半運動 ----------
    2026-10-05 體檢(400 次純天氣推薦):34° 有 18% 是拖鞋配襯衫或西裝褲,12° 有 17% 是針織上衣配運動褲。
    分數都是結構性的(≥ 抖動 1.6),不是「偶爾出現」那種偏好。 */
 const KIND = {
-  dressShirt: (i) => i.part === "upperbody" && (/襯衫/.test(i.name || "") || ["shirt", "button-up", "oxford"].some((tag) => i.tags?.includes(tag))),
+  dressShirt: (i) => i.part === "upperbody" && (/襯衫|(?<![\w-])(?<!\b(?:t|tee|polo|sweat|rugby|baseball)\s)shirt\b|button-?(up|down)/i.test(i.name || "") || ["shirt", "button-up", "oxford"].some((tag) => i.tags?.includes(tag))),
   blazer: (i) => /西裝外套|blazer/.test(itemText(i)),
   dressPants: (i) => /西裝褲|西裝長褲|slacks|dress-pants|打褶|pleated/.test(itemText(i)),
   athleticBottom: (i) => i.part === "lowerbody" && /運動|棉褲|sweatpants|sweat-shorts|jogger|束口|球褲/.test(itemText(i)),
@@ -231,7 +231,7 @@ const KIND = {
   hooded: (i) => /帽t|hoodie|連帽/.test(itemText(i)),
   knit: (i) => /針織|毛衣|knit|sweater/.test(itemText(i)),
   shorts: (i) => i.part === "lowerbody" && /短褲|shorts/.test(itemText(i)),
-  slides: (i) => i.tags?.includes("slides") || /拖鞋|涼鞋/.test(i.name || ""),
+  slides: (i) => i.tags?.includes("slides") || /拖鞋|涼鞋|sandal|slide/i.test(i.name || ""),
   leatherShoe: (i) => /真皮|皮鞋|leather|loafer|oxford|derby/.test(itemText(i)),
   runner: (i) => /慢跑|running|mesh|網布/.test(itemText(i)),
   patterned: (i) => /條紋|格紋|格子|迷彩|印花|圖案|塗鴉|stripe|pinstripe|plaid|camo|graphic/.test(itemText(i)),
@@ -297,7 +297,7 @@ function paletteOf(t) {
   // 「藍色系」「一身綠」「整套卡其」:顏色字＋色系
   if (/色系|一身|整套|全身|都穿/.test(t)) {
     const color = detectColor(t);
-    if (color) return { key: `color:${color.key}`, label: `${COLOR_NAME[color.key]}色系` };
+    if (color) return { key: `color:${color.key}`, label: `${COLOR_NAME[color.key]} tones` };
   }
   return undefined;   // 這句話沒講色系
 }
@@ -396,7 +396,7 @@ export function parseIntent(text) {
   // 地點列不完(全聯、KTV、補習班、牙醫…):句子長得像「要去哪、要吃什麼」就當成一般出門,不回「沒學過」;
   // 但記下這是猜的,回覆時講「沒學過,先當一般出門挑」
   if (!formality && /去|吃|喝|買|逛|看|找|陪|載|接|拿|領|搭|坐/.test(t) && !/換|穿|脫|那件|這件|那雙|這雙/.test(t)) {
-    formality = "casual"; label = "日常出門"; guessed = true;
+    formality = "casual"; label = "Day out"; guessed = true;
   }
 
   // 天氣覆寫(和場合獨立):使用者可能同時提到冷熱或雨
@@ -419,10 +419,10 @@ function describeIntent(intent) {
   const bits = [];
   if (intent.label) bits.push(intent.label);
   if (intent.warmthDelta) bits.push(warmthPhrase(intent.warmthDelta));
-  if (intent.forceRainy) bits.push("當下雨天");
+  if (intent.forceRainy) bits.push("rainy day");
   if (intent.palette) bits.push(intent.palette.label);
   // 不要的東西也是採用的條件;「不要上衣」這種做不到的不列(引擎會另外講沒照做)
-  for (const ex of intent.exclude || []) if (!(ex.whole && CORE_SLOT.has(ex.slot))) bits.push(`不要${ex.word}`);
+  for (const ex of intent.exclude || []) if (!(ex.whole && CORE_SLOT.has(ex.slot))) bits.push(`no ${ex.word}`);
   return bits.length ? bits.join(" · ") : null;
 }
 
@@ -457,7 +457,7 @@ function intentItemScore(item, intent) {
   else if (intent.formality === "casual") s = (casual ? 0.6 : 0) + (formal ? -0.6 : 0);
   // 正式/得體場合:拖鞋、涼鞋再怎麼熱也不該出現,額外重扣蓋過熱天的 +0.8 加分
   if ((intent.formality === "formal" || intent.formality === "smart")
-    && (item.tags?.includes("slides") || /拖鞋|涼鞋/.test(item.name || ""))) s -= 2.5;
+    && (item.tags?.includes("slides") || /拖鞋|涼鞋|sandal|slide/i.test(item.name || ""))) s -= 2.5;
   // 正式場合不穿短褲,再熱也一樣(審查 F15)。只套 formal:約會(smart)熱天穿短褲是合理的
   if (intent.formality === "formal" && isShorts(item)) s -= 4;
   // 卡其、斜紋這種剪裁的短褲,得體場合加分:2026-10-19 起卡其短褲不再算「正式」線索(說明會寫「偏休閒」,那才是實話),
@@ -470,11 +470,14 @@ function intentItemScore(item, intent) {
   return s;
 }
 
-/** 品名太長截短給理由用;截到括號裡面就整個括號拿掉(不留「(TOD'…」這種半截)。 */
-function shortName(name, max = 14) {
+/** 品名太長截短給理由用;截到括號裡面就整個括號拿掉(不留「(TOD'…」這種半截)。
+ *  參賽版是英文品名:同樣的意思字數多一倍多,預設從 14 放寬到 28 */
+function shortName(name, max = 28) {
   const text = String(name || "");
   if (text.length <= max) return text;
   let cut = text.slice(0, max);
+  // 參賽版英文品名:切在字中間就退回前一個空白(「Camel heavy cotton twill shi…」,驗收抓到)
+  if (/[A-Za-z]$/.test(cut) && /[A-Za-z]/.test(text[max] || "") && cut.lastIndexOf(" ") > 0) cut = cut.slice(0, cut.lastIndexOf(" "));
   const open = Math.max(cut.lastIndexOf("("), cut.lastIndexOf("（"));
   if (open > 0 && cut.indexOf(")", open) < 0 && cut.indexOf("）", open) < 0) cut = cut.slice(0, open);
   cut = cut.replace(/[\s(（【\[]+$/, "");
@@ -487,8 +490,8 @@ export function cueHits(item) {
   const text = styleText(item);
   const find = (list, kind) => { const w = list.find((k) => text.includes(k.toLowerCase())); return w ? { w, kind } : null; };
   // 短褲再怎麼樣都不算正式:場合評分本來就扣短褲,說法要跟著一致
-  const formal = /短褲|shorts/.test(itemText(item)) ? null : find(FORMAL_CUES, "正式");
-  return [formal, find(SPORTY_CUES, "運動"), find(CASUAL_CUES, "休閒")].filter(Boolean);
+  const formal = /短褲|shorts/.test(itemText(item)) ? null : find(FORMAL_CUES, "formal");
+  return [formal, find(SPORTY_CUES, "sporty"), find(CASUAL_CUES, "casual")].filter(Boolean);
 }
 /** 只要一個的時候:正式優先,再來運動、休閒 */
 function cueHit(item) {
@@ -567,7 +570,7 @@ const NO_LINKS = ["還有", "跟", "和", "及", "與", "或", "、"];
 const NOT_EXCLUDE_AFTER = ["太", "很", "那麼", "這麼", "過", "要", "得"];
 // 講這些字 = 那一格整個不要(「不要外套」是不穿外套);其他字只避開那一類(「不要短褲」照樣要穿褲子)
 const WHOLE_SLOT_WORDS = new Set(["外套", "上衣", "衣服", "褲", "褲子", "鞋", "鞋子", "襪", "襪子", "包", "包包", "眼鏡", "墨鏡", "手錶", "手環", "錶", "皮帶", "腰帶", "項鍊", "戒指", "帽子", "帽", "圍巾"]);
-const CORE_NAME = { upperbody: "上衣", lowerbody: "下身", shoes: "鞋子" };
+const CORE_NAME = { upperbody: "top", lowerbody: "bottoms", shoes: "shoes" };
 const CLAUSE_BREAK = /[\s,，。.!！?？、;；:：]/;
 let slotWordList = null;
 const slotWordsByLength = () => {
@@ -700,7 +703,7 @@ function applyExclusions(items, locked, exclude) {
   for (const ex of exclude) {
     if (ex.whole) {
       if (CORE_SLOT.has(ex.slot)) {
-        out.notes.push(`「不要${ex.word}」沒照做:${CORE_NAME[ex.slot]}總得穿;想換掉身上那件,說「換一件${CORE_NAME[ex.slot]}」`);
+        out.notes.push(`Didn't do “no ${ex.word}”: you need ${CORE_NAME[ex.slot]} anyway; to change the one on the form, say “swap the ${CORE_NAME[ex.slot]}”`);
         continue;
       }
       out.items = out.items.filter((item) => item.part !== ex.slot);
@@ -718,9 +721,9 @@ function applyExclusions(items, locked, exclude) {
     }
     const hit = exclusionTest(ex);
     const rest = out.items.filter((item) => !hit(item));
-    if (rest.length === out.items.length) { out.notes.push(`櫃裡沒有${ex.word},「不要${ex.word}」不用特別避開`); continue; }
+    if (rest.length === out.items.length) { out.notes.push(`No ${ex.word} in the closet, so “no ${ex.word}” needs no avoiding`); continue; }
     if (CORE_SLOT.has(ex.slot) && !rest.some((item) => item.part === ex.slot)) {
-      out.notes.push(`櫃裡的${CORE_NAME[ex.slot]}都是${ex.word},「不要${ex.word}」這次做不到`);
+      out.notes.push(`Every ${CORE_NAME[ex.slot]} piece in the closet is ${ex.word}, so “no ${ex.word}” can't be done this time`);
       continue;
     }
     out.items = rest;
@@ -798,9 +801,9 @@ function unusedClauses(raw, rest) {
 function heardNotes(intent, raw, rest) {
   const notes = [];
   const unused = unusedClauses(raw, rest);
-  if (intent.guessed) notes.push(unused.length ? `「${unused.join("」「")}」我還沒學過,先當一般出門挑` : "沒聽出是什麼場合,先當一般出門挑");
-  else if (unused.length) notes.push(`「${unused.join("」「")}」這${unused.length > 1 ? "幾" : ""}段沒完全聽懂,只照聽懂的部分挑`);
-  if (intent.alsoHeard?.length) notes.push(`也聽到「${intent.alsoHeard.join("」「")}」,但一套只照一個場合,先照「${intent.heard || intent.label}」挑`);
+  if (intent.guessed) notes.push(unused.length ? `I haven't learned “${unused.join("”, “")}” yet, so I picked for an ordinary day out` : "Couldn't tell the occasion, so I picked for an ordinary day out");
+  else if (unused.length) notes.push(`Didn't fully understand “${unused.join("”, “")}”, so I picked from the parts I understood`);
+  if (intent.alsoHeard?.length) notes.push(`Also heard “${intent.alsoHeard.join("”, “")}”, but one outfit follows one occasion, so I went with “${intent.heard || intent.label}”`);
   return notes;
 }
 
@@ -852,21 +855,26 @@ const COLOR_WORDS = [
   { key: "orange", words: ["橘", "橙"], target: { h: 30, l: 0.55 }, test: (c) => c.h >= 15 && c.h <= 45 && c.s > 0.5 && c.l > 0.4 },
 ];
 
-const COLOR_NAME = { navy: "深藍", white: "白", black: "黑", grey: "灰", blue: "藍", red: "紅", green: "綠", khaki: "卡其", brown: "咖啡", purple: "紫", pink: "粉紅", yellow: "黃", orange: "橘" };
+const COLOR_NAME = { navy: "Navy", white: "White", black: "Black", grey: "Gray", blue: "Blue", red: "Red", green: "Green", khaki: "Khaki", brown: "Brown", purple: "Purple", pink: "Pink", yellow: "Yellow", orange: "Orange" };
 
 /** 色碼 → 「深藍色」這種說法,給人看的畫面用(審查 F50:舊版直接露出 #4D474B)。認不出來的叫「混色」。 */
 export function colorName(hex) {
   if (!/^#?[0-9a-f]{6}$/i.test(hex || "")) return "";
   const hsl = hexToHsl(hex);
   const hit = COLOR_WORDS.find((spec) => spec.test(hsl));
-  return hit ? `${COLOR_NAME[hit.key]}色` : "混色";
+  return hit ? `${COLOR_NAME[hit.key]}` : "Mixed";
 }
 
 /** 給人看的顏色名:品名裡寫了顏色就用品名的(「駝色斜紋外套」叫駝色),沒寫才用色碼猜。
  *  照片抓的色碼分不開駝色和橄欖綠(兩個都在色相 39°~42°,2026-10-08 實測),品名是人看著衣服寫的,比較準。 */
-const NAME_COLOR_FIX = { 丹寧: "丹寧藍", 金: "金色" };
+const NAME_COLOR_FIX = { 丹寧: "Denim blue", 金: "Gold" };
+// 參賽版的品名是英文:品名寫的顏色一樣比色碼準,先找英文顏色字。前面的深淺、後面接的一個顏色字一起拿
+// (「Dark brown-black」「Gray-blue」「Light blue」),跟中文版「深橄欖棕」「藍綠」同一個意思
+const EN_COLOR = /\b(?:(?:light|dark|sky|forest|heather)[ -])?(?:off-white|navy|white|cream|ivory|ecru|black|charcoal|gray|grey|blue|denim|indigo|red|burgundy|maroon|wine|green|olive|sage|khaki|beige|tan|camel|brown|chocolate|purple|lavender|pink|yellow|mustard|orange|rust)(?:-(?:blue|green|gray|grey|brown|black|white|purple))?\b/i;
 export function colorLabel(name, hex) {
   const text = String(name || "");
+  const en = text.match(EN_COLOR);
+  if (en) return en[0].charAt(0).toUpperCase() + en[0].slice(1).toLowerCase();
   let best = null, at = Infinity;
   for (const spec of COLOR_WORDS) for (const word of spec.words) {
     const index = text.indexOf(word);
@@ -916,7 +924,7 @@ const COOLER = ["再涼", "涼一點", "涼快一點", "太熱", "熱死", "薄�
 const WARMER = ["再暖", "暖一點", "太冷", "冷死", "厚一點", "多穿一點", "穿多一點", "會冷", "保暖一點", "太薄", "太涼", "會著涼"];
 
 const LADDER = ["casual", "smart", "formal"];
-const LADDER_LABEL = { casual: "輕鬆一點", smart: "得體一點", formal: "正式場合" };
+const LADDER_LABEL = { casual: "More relaxed", smart: "A bit smarter", formal: "Formal occasion" };
 
 /** 把「再正式一點／再涼一點」套在上一次的意圖上,回新意圖＋要跟使用者說的話(例如已經最正式了)。 */
 export function adjustIntent(prev, adj) {
@@ -929,7 +937,7 @@ export function adjustIntent(prev, adj) {
     const idx = cur ? LADDER.indexOf(cur) : (adj.formalityStep > 0 ? 0 : 1);   // 沒場合:往上從休閒起跳→得體,往下→輕鬆
     const next = LADDER[Math.max(0, Math.min(LADDER.length - 1, idx + adj.formalityStep))];
     // 已經到頂(底)了:照實講,場合名稱(「上課」)留著,不要被蓋成「輕鬆一點」
-    if (cur && next === cur) notes.push(adj.formalityStep > 0 ? "已經是最正式的了" : "已經是最輕鬆的了");
+    if (cur && next === cur) notes.push(adj.formalityStep > 0 ? "Already the most formal" : "Already the most relaxed");
     else { base.formality = next; base.label = LADDER_LABEL[next]; base.activity = null; base.occasionPref = null; base.boost = null; }
   }
   if (adj.warmthDelta) base.warmthDelta = Math.max(-12, Math.min(12, (base.warmthDelta || 0) + adj.warmthDelta));
@@ -1112,14 +1120,14 @@ export function findItemForSwap(items, spec, wearLog = {}, excludeId = null) {
 /* ---------- 主入口 ---------- */
 
 /* 被雨剔掉的單品講材質(麂皮、帆布、真皮),認不出材質就講短品名;同樣的只講一次。 */
-const MATERIAL_WORDS = [["麂皮", /suede|麂皮/], ["帆布", /canvas|帆布/], ["真皮", /leather|真皮|皮革/], ["丹寧", /denim|丹寧|牛仔/]];
+const MATERIAL_WORDS = [["suede", /suede|麂皮/], ["canvas", /canvas|帆布/], ["leather", /leather|真皮|皮革/], ["denim", /denim|丹寧|牛仔/]];
 function materialsOf(list) {
   const out = [];
   for (const item of list) {
     const text = itemText(item);
     const material = MATERIAL_WORDS.find(([, pattern]) => pattern.test(text));
     const name = item.name || "";
-    const word = material ? material[0] : `「${name.length > 10 ? `${name.slice(0, 10)}…` : name}」`;
+    const word = material ? material[0] : `“${name.length > 24 ? `${name.slice(0, 24)}…` : name}”`;
     if (!out.includes(word)) out.push(word);
   }
   return out;
@@ -1210,7 +1218,7 @@ export function recommendOutfitWithBorrow(items, borrowPool, weather, wearLog, i
   let count = 0;
   for (const [slot, item] of Object.entries(lent.outfit)) if (item && lentIds.has(item.id)) { lent.outfit[slot] = { ...item, borrowed: true }; count += 1; }
   if (!count) return lent;
-  lent.reasons = [`這套有 ${count} 件是借示範衣櫃的${own.missing ? `(你的衣櫃還沒有${own.missing})` : ""};再加幾件自己的,就能整套都用自己的。`, ...(lent.reasons || [])];
+  lent.reasons = [`${count} ${count === 1 ? "piece in this outfit is" : "pieces in this outfit are"} borrowed from the demo closet${own.missing ? ` (your closet has no ${own.missing} yet)` : ""}; add a few of your own and it can be all yours.`, ...(lent.reasons || [])];
   lent.borrowed = count;
   return lent;
 }
@@ -1235,9 +1243,9 @@ export function recommendOutfit(items, weather, wearLog, intent = null, locked =
   const tops = pool("upperbody"), bottoms = pool("lowerbody");
   // 講缺什麼,畫面上才知道下一步要加哪一件(審查 F36:舊版只說「不夠」)
   if (!tops.length || !bottoms.length) {
-    const missing = !tops.length && !bottoms.length ? "上衣和下身" : !tops.length ? "上衣" : "下身";
-    const need = [!tops.length && "上衣 1 件", !bottoms.length && "下身 1 件"].filter(Boolean).join("、");
-    return { error: `還差${need}就能配`, missing };
+    const missing = !tops.length && !bottoms.length ? "tops or bottoms" : !tops.length ? "tops" : "bottoms";
+    const need = [!tops.length && "a top", !bottoms.length && "a bottom piece"].filter(Boolean).join(" and ");
+    return { error: `Add ${need} to make an outfit`, missing };
   }
 
   // 場合意圖可覆寫天氣:「當冷天穿」降體感、「會下雨」拉高降雨機率。重指派 weather(新物件,不動呼叫端)。
@@ -1437,55 +1445,55 @@ export function recommendOutfit(items, weather, wearLog, intent = null, locked =
 
   const reasons = [];
   if (intent?.formality) {
-    const how = { formal: "正式一點", smart: "得體一點", sporty: "好活動的", casual: "輕鬆自在" }[intent.formality];
+    const how = { formal: "a bit more formal", smart: "a bit smarter", sporty: "easy to move in", casual: "relaxed" }[intent.formality];
     // 場合標籤本身就是那句話(如「得體一點」)時,別再接一次同樣的字,免得「為『得體一點』挑得體一點」
-    const tail = how && !intent.label.includes(how) && !how.includes(intent.label) ? `挑${how}` : "搭配";
-    reasons.push(`為「${intent.label}」${tail}`);
+    const tail = how && !intent.label.includes(how) && !how.includes(intent.label) ? `leaning ${how}` : "styled";
+    reasons.push(`For “${intent.label}”, ${tail}`);
   }
   const feel = weather.feelsLike;
-  const advice = feel >= 28 ? "選透氣的穿" : feel >= 22 ? "薄長袖或短袖都行" : feel >= 16 ? "記得保暖" : "穿暖一點";
+  const advice = feel >= 28 ? "go for breathable pieces" : feel >= 22 ? "a light long-sleeve or short sleeves both work" : feel >= 16 ? "keep warm" : "dress warmly";
   // 外面很熱、人說冷:多半是冷氣房、圖書館。外套要講成「帶著進室內穿」,不是「早晚偏涼」
   const indoorCold = intent?.warmthDelta < 0 && forecast.feelsLike >= 28;
   if (intent?.warmthDelta) {
-    reasons.push(`照你說的${warmthPhrase(intent.warmthDelta)}:預報體感 ${forecast.feelsLike}°,照 ${feel}° 的穿法挑,${advice}`);
+    reasons.push(`As you asked, ${warmthPhrase(intent.warmthDelta)}: the forecast feels like ${forecast.feelsLike}°, so it dressed for ${feel}°; ${advice}`);
   } else {
-    reasons.push(`體感 ${feel}°,${advice}`);
+    reasons.push(`Feels like ${feel}°, ${advice}`);
   }
   if (best.outer && !locked.wholebody_up) {
-    const name = `「${best.outer.name}」`;
-    if (useOpenLayer) reasons.push(`熱歸熱,${name}敞開穿當個層次`);
-    else if (indoorCold) reasons.push(`外面還是 ${forecast.feelsLike}°,${name}帶著,進冷氣房再穿`);
+    const name = `“${best.outer.name}”`;
+    if (useOpenLayer) reasons.push(`It's hot, but wear ${name} open as a layer`);
+    else if (indoorCold) reasons.push(`It's still ${forecast.feelsLike}° outside; bring ${name} and put it on in air-conditioning`);
     else if (feel < 24) {
       // 早晚偏涼只在今天溫差大時才講;整天都冷就直說
-      const why = feel < 18 ? "天冷" : !intent?.warmthDelta && forecast.tMax - forecast.tMin >= 6 ? "早晚偏涼" : "有點涼";
-      reasons.push(`${why},搭${name}`);
-    } else reasons.push(`${intent?.forceRainy ? "你說會下雨" : "會下雨"},加件${name}`);
+      const why = feel < 18 ? "It's cold" : !intent?.warmthDelta && forecast.tMax - forecast.tMin >= 6 ? "Cool in the morning and evening" : "A bit cool";
+      reasons.push(`${why}, so add ${name}`);
+    } else reasons.push(`${intent?.forceRainy ? "You said it will rain" : "Rain is coming"}, so add ${name}`);
   }
   if (exclusion.applied.length) {
     // 本來要加外套的原因照實講(needOuter):體感 24° 以下是冷,24° 以上是因為會下雨。
     // 以前一律寫「體感 X° 本來會加件外套」,25° 下雨天就前面說「薄長袖或短袖都行」、這裡又說會加外套(2026-10-24 試用者抓到)
-    const rainyWhy = intent?.forceRainy ? "你說會下雨" : "會下雨";
+    const rainyWhy = intent?.forceRainy ? "You said it will rain" : "Rain is coming";
     // 衣櫃裡本來就沒外套,「本來會加件外套」是假話(驗收讀 code 抓到):只有櫃裡有外套才講
     const hadOuter = items.some((item) => item.part === "wholebody_up");
     const cold = !(exclusion.noOuter && wantOuter && hadOuter) ? ""
-      : feel < 24 ? `;體感 ${feel}° 本來會加件外套,怕冷就自己帶一件` : `;${rainyWhy},本來會加件外套,怕淋濕就自己帶一件`;
-    reasons.push(`照你說的不要${exclusion.applied.join("、")}${cold}`);
+      : feel < 24 ? `; at ${feel}° it would have added a jacket, so bring one if you get cold` : `; ${rainyWhy.toLowerCase()}, so it would have added a jacket; bring one if you don't want to get wet`;
+    reasons.push(`As you asked, no ${exclusion.applied.join(", ")}${cold}`);
   }
   reasons.push(...exclusion.notes);
   // 使用者自己說會下雨時,別報「降雨 80%」(那是被覆寫的假數字,和面板上的真預報打架);用「你說會下雨」誠實表述
-  if (intent?.forceRainy) reasons.push("你說會下雨,記得帶傘");
-  else if (weather.rainProb >= 50) reasons.push(`降雨 ${weather.rainProb}%,記得帶傘`);
-  else if (weather.rainProb >= 30) reasons.push(`降雨 ${weather.rainProb}%,包包塞把折傘`);
+  if (intent?.forceRainy) reasons.push("You said it will rain, so bring an umbrella");
+  else if (weather.rainProb >= 50) reasons.push(`${weather.rainProb}% chance of rain, bring an umbrella`);
+  else if (weather.rainProb >= 30) reasons.push(`${weather.rainProb}% chance of rain, tuck a folding umbrella in your bag`);
   if (skippedShoes.length || skippedBags.length) {
     const avoided = [
-      skippedShoes.length && `${materialsOf(skippedShoes).join("、")}的鞋`,
-      skippedBags.length && `${materialsOf(skippedBags).join("、")}的包`,
+      skippedShoes.length && materialsOf(skippedShoes).map((word) => (word.startsWith("“") ? word : `${word} shoes`)).join(" and "),
+      skippedBags.length && materialsOf(skippedBags).map((word) => (word.startsWith("“") ? word : `${word} bags`)).join(" and "),
     ].filter(Boolean);
-    reasons.push(`會下雨,${avoided.join("和")}先收著`);
+    reasons.push(`Rain is coming, so ${avoided.join(" and ")} stay home`);
   }
   // 這套裡有自己穿過、收藏過的組合:講出來,知道推薦是看過你的選擇的
   const recalled = recall && pairScore(taste, best.top, best.bottom) > 0;
-  if (recalled) reasons.push(`「${best.top.name}」配「${best.bottom.name}」你之前穿過或收藏過`);
+  if (recalled) reasons.push(`You've worn or saved “${best.top.name}” with “${best.bottom.name}” before`);
   const colorInfo = colorScore([best.top, best.bottom, best.outer].filter(Boolean));
   if (inPalette) {
     // 說了色系就講做到幾成;櫃裡湊不齊也照實講,不假裝
@@ -1498,28 +1506,28 @@ export function recommendOutfit(items, weather, wearLog, intent = null, locked =
       ? everyOuter.find((outer) => outer.rainOk === false && outer.color && inPalette(outer)) : null;
     const others = off.filter((item) => !(rainedShoe && item === outfit.shoes) && !(rainedOuter && item === best.outer));
     const why = [
-      rainedOuter && `合色系的「${rainedOuter.name}」怕雨,外套換成「${best.outer.name}」`,
-      rainedShoe && `合色系的「${rainedShoe.name}」怕雨先收著,鞋子換成「${outfit.shoes.name}」`,
-      others.length && `「${others[0].name}」${others.length > 1 ? `等 ${others.length} 件` : ""}不在這個色系(櫃裡這個條件下沒有更合的)`,
+      rainedOuter && `“${rainedOuter.name}” fits the palette but doesn't like rain, so the jacket is “${best.outer.name}”`,
+      rainedShoe && `“${rainedShoe.name}” fits the palette but doesn't like rain, so the shoes are “${outfit.shoes.name}”`,
+      others.length && `“${others[0].name}”${others.length > 1 ? ` and ${others.length - 1} more` : ""} ${others.length > 1 ? "aren't" : "isn't"} in this palette (nothing closer in the closet under these conditions)`,
     ].filter(Boolean);
     reasons.push(why.length
-      ? `照「${intent.palette.label}」挑,不過${why.join(";")}`
-      : `照「${intent.palette.label}」挑,整套都在這個色系`);
+      ? `Picked for “${intent.palette.label}”, but ${why.join("; ")}`
+      : `Picked for “${intent.palette.label}”; the whole outfit is in this palette`);
   } else if (colorInfo.score > 0) reasons.push(colorInfo.label);
 
   // 誠實:說了要正式/得體,但櫃裡湊不出來時講清楚,別假裝挑到了
   if (intent?.formality === "formal" || intent?.formality === "smart") {
-    if (!chosen.some((it) => cueHit(it)?.kind === "正式")) {
-      reasons.push("櫃裡正式的衣服不多,先挑了最接近的");
+    if (!chosen.some((it) => cueHit(it)?.kind === "formal")) {
+      reasons.push("There aren't many formal pieces in the closet, so these are the closest");
     }
     // 跟下面「看到的線索」用同一把尺(cueHit),免得一邊說 leather 正式、一邊說沒正式鞋。
     // 原因要分清楚:被雨剔掉的不能講成「櫃裡沒有」(審查 F16);鞋是自己鎖的就不用解釋
-    if (outfit.shoes && !locked.shoes && cueHit(outfit.shoes)?.kind !== "正式") {
-      const rainedOut = skippedShoes.find((shoe) => cueHit(shoe)?.kind === "正式");
-      const passedOver = allShoes.find((shoe) => cueHit(shoe)?.kind === "正式");
-      if (rainedOut) reasons.push(`「${shortName(rainedOut.name)}」怕雨先收著,鞋換一雙不怕淋的`);
-      else if (passedOver) reasons.push(`「${shortName(passedOver.name)}」這次沒選上,鞋配了輕鬆一點的`);
-      else reasons.push("櫃裡沒有皮鞋這類正式的鞋,先配這雙");
+    if (outfit.shoes && !locked.shoes && cueHit(outfit.shoes)?.kind !== "formal") {
+      const rainedOut = skippedShoes.find((shoe) => cueHit(shoe)?.kind === "formal");
+      const passedOver = allShoes.find((shoe) => cueHit(shoe)?.kind === "formal");
+      if (rainedOut) reasons.push(`“${shortName(rainedOut.name)}” doesn't like rain and stays home; these shoes can take it`);
+      else if (passedOver) reasons.push(`“${shortName(passedOver.name)}” wasn't picked this time; the shoes are more relaxed`);
+      else reasons.push("No formal shoes like leather ones in the closet, so these for now");
     }
   }
 
@@ -1527,18 +1535,18 @@ export function recommendOutfit(items, weather, wearLog, intent = null, locked =
   // 會讓人停下來懷疑分類),另外回傳 details,畫面收在「怎麼判斷的」裡,點開才看到
   const details = [];
   if (intent?.formality) {
-    details.push("照名字和標籤裡的字判斷:看到「襯衫」「西裝」「皮鞋」這類算偏正式,「球衣」「運動」「慢跑」算偏運動,「牛仔」「短褲」「T 恤」算偏休閒;一件兩種都有,兩邊都算");
+    details.push("Judged from words in the name and tags: “shirt”, “suit”, “leather” lean formal; “jersey”, “sport”, “running” lean sporty; “denim”, “shorts”, “tee” lean casual. A piece with both counts for both");
     for (const it of [...chosen, outfit.shoes].filter(Boolean)) {
       const hits = cueHits(it);
       const short = shortName(it.name);
       // 線索詞有一半是英文標籤(leather、tee),畫面上換成中文(審查 F50)
-      const zh = (hit) => `「${CUE_ZH[hit.w] || hit.w}」`;
+      const zh = (hit) => `“${hit.w}”`;
       // 命中兩種以上就把證據都列出來、不下結論:評分本來就兩邊都算(intentItemScore)。以前只講第一個,
       // 「黑色真皮厚底休閒鞋」標籤有 leather 也有 sneakers,畫面只寫「偏正式:有皮革」,跟名字打架(2026-10-19 驗收)。
       // 104 件裡有 20 件是兩種都有(白色棉質長袖襯衫:襯衫＋棉),寫「都沾一點」白襯衫會很怪,所以只列哪個字偏哪邊
-      details.push(!hits.length ? `「${short}」看不出偏哪一種,照天氣和顏色挑的`
-        : hits.length === 1 ? `「${short}」偏${hits[0].kind}:名字或標籤裡有${zh(hits[0])}`
-          : `「${short}」${hits.length === 2 ? "兩邊" : "三種"}都有:${hits.map((hit) => `${zh(hit)}偏${hit.kind}`).join("、")}`);
+      details.push(!hits.length ? `“${short}” doesn't lean any way; picked for the weather and color`
+        : hits.length === 1 ? `“${short}” leans ${hits[0].kind}: the name or tags include ${zh(hits[0])}`
+          : `“${short}” has ${hits.length === 2 ? "both" : "all three"}: ${hits.map((hit) => `${zh(hit)} leans ${hit.kind}`).join(", ")}`);
     }
   }
 

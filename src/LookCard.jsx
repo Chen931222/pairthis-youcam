@@ -21,7 +21,7 @@ export function LookCard({ outfit, fits, slotStyle, caption, onClose }) {
         setUrl((old) => { if (old) URL.revokeObjectURL(old); return URL.createObjectURL(blob); });
         setBusy(false);
       })
-      .catch((cause) => { if (alive) { setError(`合成失敗:${cause?.message || cause}`); setBusy(false); } });
+      .catch((cause) => { if (alive) { setError(`Couldn't make the card: ${cause?.message || cause}`); setBusy(false); } });
     return () => { alive = false; };
   }, [style, outfit, fits, slotStyle, caption]);
 
@@ -51,41 +51,41 @@ export function LookCard({ outfit, fits, slotStyle, caption, onClose }) {
     try {
       const blob = await fetch(url).then((response) => response.blob());
       const file = new File([blob], fileName, { type: "image/png" });
-      if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: caption.title || "今日穿搭" }); return; }
+      if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: caption.title || "Today's outfit" }); return; }
     } catch { /* 使用者取消或不支援檔案分享,退回下載 */ }
     download();
   };
 
   return (
     <div className="lookcard-overlay" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="lookcard" role="dialog" aria-modal="true" aria-label="這套穿搭的卡片">
+      <div className="lookcard" role="dialog" aria-modal="true" aria-label="Card for this outfit">
         <div className="lookcard-head">
-          <div className="lookcard-tabs" role="tablist" aria-label="卡片版式">
-            <button type="button" role="tab" aria-selected={style === "flatlay"} className={style === "flatlay" ? "active" : ""} onClick={() => setStyle("flatlay")}>平鋪</button>
-            <button type="button" role="tab" aria-selected={style === "doll"} className={style === "doll" ? "active" : ""} onClick={() => setStyle("doll")}>人形</button>
+          <div className="lookcard-tabs" role="tablist" aria-label="Card layout">
+            <button type="button" role="tab" aria-selected={style === "flatlay"} className={style === "flatlay" ? "active" : ""} onClick={() => setStyle("flatlay")}>Flat lay</button>
+            <button type="button" role="tab" aria-selected={style === "doll"} className={style === "doll" ? "active" : ""} onClick={() => setStyle("doll")}>On the form</button>
           </div>
-          <button type="button" className="lookcard-close" onClick={onClose} aria-label="關閉" ref={closeRef}>
+          <button type="button" className="lookcard-close" onClick={onClose} aria-label="Close" ref={closeRef}>
             <X size={20} weight="light" aria-hidden="true" />
           </button>
         </div>
 
         <div className="lookcard-preview">
-          {busy && <p className="lookcard-status">合成中…</p>}
+          {busy && <p className="lookcard-status">Making the card…</p>}
           {!busy && error && <p className="lookcard-status error">{error}</p>}
-          {!busy && !error && url && <img src={url} alt="這套穿搭的卡片" />}
+          {!busy && !error && url && <img src={url} alt="Card for this outfit" />}
         </div>
 
         <div className="lookcard-actions">
           <button type="button" onClick={download} disabled={!url}>
-            <DownloadSimple size={15} weight="regular" aria-hidden="true" /> 下載 PNG
+            <DownloadSimple size={15} weight="regular" aria-hidden="true" /> Download PNG
           </button>
           {canShare && (
             <button type="button" className="lookcard-share" onClick={share} disabled={!url}>
-              <ShareNetwork size={15} weight="regular" aria-hidden="true" /> 分享
+              <ShareNetwork size={15} weight="regular" aria-hidden="true" /> Share
             </button>
           )}
         </div>
-        <p className="lookcard-note">在你的裝置上合成,沒有任何東西上傳。</p>
+        <p className="lookcard-note">Made on your device. Nothing is uploaded.</p>
       </div>
     </div>
   );

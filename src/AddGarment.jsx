@@ -59,7 +59,7 @@ function CropBox({ src, box, onChange }) {
 
   return (
     <div className="crop-frame" ref={frameRef}>
-      <img src={src} alt="要框選的照片" draggable="false" />
+      <img src={src} alt="Photo to crop" draggable="false" />
       <div
         className="crop-surface"
         onPointerDown={down}
@@ -93,7 +93,7 @@ function ImagePicker({ images, onPick }) {
     <>
       <div className="pick-grid">
         {images.map((image, index) => !failed.has(index) && (
-          <button key={image.thumb} type="button" className="pick-cell" onClick={() => onPick(image)} aria-label={`用第 ${index + 1} 張`}>
+          <button key={image.thumb} type="button" className="pick-cell" onClick={() => onPick(image)} aria-label={`Use image ${index + 1}`}>
             <img
               src={image.thumb}
               alt=""
@@ -106,10 +106,10 @@ function ImagePicker({ images, onPick }) {
       </div>
       {allFailed && (
         <p className="add-field-error">
-          {offline ? "現在沒有網路,商品圖載不到。有網路再試,或改用截圖。" : "這件的商品圖載不到(網址可能不對,或品牌那邊擋了)。改用截圖。"}
+          {offline ? "You're offline, so the product image can't load. Try again when you're online, or use a screenshot." : "This product image won't load (the link may be wrong, or the brand blocks it). Use a screenshot instead."}
         </p>
       )}
-      {!allFailed && loaded === 0 && <small className="add-hint">載入中…</small>}
+      {!allFailed && loaded === 0 && <small className="add-hint">Loading…</small>}
     </>
   );
 }
@@ -133,12 +133,12 @@ async function toCutoutFormat(file) {
 }
 
 /** 價錢欄:數字＋幣別。抓得到的已經填好;手動填的預設新台幣。也給單品頁用 */
-export function PriceField({ value, currency, onChange, hint = "選填", id = "price" }) {
+export function PriceField({ value, currency, onChange, hint = "Optional", id = "price" }) {
   return (
     <div className="add-field price-field">
-      <label htmlFor={`${id}-amount`}>價錢</label>
+      <label htmlFor={`${id}-amount`}>Price</label>
       <div className="price-row">
-        <select aria-label="幣別" value={currency || "TWD"} onChange={(event) => onChange(value, event.target.value)}>
+        <select aria-label="Currency" value={currency || "TWD"} onChange={(event) => onChange(value, event.target.value)}>
           {CURRENCIES.map(([code, symbol]) => <option key={code} value={code}>{symbol}</option>)}
         </select>
         <input
@@ -148,7 +148,7 @@ export function PriceField({ value, currency, onChange, hint = "選填", id = "p
           autoComplete="off"
           value={value ?? ""}
           onChange={(event) => onChange(event.target.value, currency || "TWD")}
-          placeholder="例:1290"
+          placeholder="E.g. 1290"
         />
       </div>
       {hint && <small className="add-hint">{hint}</small>}
@@ -175,19 +175,20 @@ function cutoutErrorText(cause) {
   const raw = `${cause?.name || ""} ${cause?.message || cause || ""}`.trim();
   // 記憶體先判:WASM 記憶體不夠時錯誤長得像「Aborted(OOM)」,不能被下面的 abort 當成斷線
   if (/memory|oom|allocation|rangeerror|out of bounds|aborted\(/i.test(raw)) {
-    return `這張圖對手機來說太大,記憶體不夠。框小一點、或關掉其他分頁再試。(${raw.slice(0, 80)})`;
+    return `This image is too big for the phone's memory. Crop a smaller area or close other tabs and try again. (${raw.slice(0, 80)})`;
   }
   if (/load failed|failed to fetch|networkerror|network|fetch|timeout|aborterror/i.test(raw)) {
-    return `去背模型沒下載完(約 80MB,手機訊號弱時常斷掉)。連上 Wi-Fi 再按一次。(${raw.slice(0, 80)})`;
+    return `The background-removal model didn't finish downloading (about 80 MB; weak mobile signal often cuts it off). Connect to Wi-Fi and tap again. (${raw.slice(0, 80)})`;
   }
-  return `去背失敗,再按一次試試;還是不行就換一張。(${raw.slice(0, 80) || "沒有錯誤訊息"})`;
+  return `Background removal failed. Tap again; if it still fails, try another photo. (${raw.slice(0, 80) || "no error message"})`;
 }
 
 const PAD = 0.1;
 // 店裡比一下的快速分類:店裡最常比的五類,其他的收在「其他…」
 const STORE_PARTS = ["upperbody", "wholebody_up", "lowerbody", "shoes", "bag"];
 /** 店裡比一下的品名:打的字 + 點的版型、款式(例「UNIQLO 寬版T恤」),拿去比對,存的話也存成這個名字 */
-const storeName = (draft) => [draft.name.trim(), `${draft.fit || ""}${draft.kind || ""}`].filter(Boolean).join(" ");
+// 參賽版是英文:版型和款式中間要空格(「slim shirt」),黏成「slimshirt」就對不到 \bshirt\b
+const storeName = (draft) => [draft.name.trim(), draft.fit, draft.kind].filter(Boolean).join(" ");
 
 /** 框往外多留 10% 再去背:框得太貼,模型看不到背景,中間色的條紋會被去成半透明、旁邊留一條陰影(審查 F19)。去背完再裁回原本的框。 */
 function expandBox(region) {
@@ -279,7 +280,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
       if (!historyRef.current) return;   // 自己 history.back() 吃掉的那一筆,或新增沒開著
       historyRef.current = false;
       if (stageRef.current === "idle") return;
-      if (stageRef.current === "review" && !window.confirm("要放棄剛去背好的這件嗎?")) { pushHistory(); return; }
+      if (stageRef.current === "review" && !window.confirm("Discard the piece you just cut out?")) { pushHistory(); return; }
       clearRef.current();
     };
     window.addEventListener("popstate", onPop);
@@ -318,7 +319,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
   // Esc、✕、取消、返回手勢:去背好的那一步先問(焦點一進來就在 ✕ 上,按一下 Enter 不該把算了半分鐘的結果丟掉),其他直接關
   const requestClose = () => {
     if (store) { reset(); return; }   // 店裡比一下是試算,關掉不用問
-    if (stage === "review" && !window.confirm(replacing ? "不換這張圖了?" : draft?.blob ? "要放棄剛去背好的這件嗎?" : "要放棄這件嗎?填好的不會留著。")) return;
+    if (stage === "review" && !window.confirm(replacing ? "Keep the current image?" : draft?.blob ? "Discard the piece you just cut out?" : "Discard this piece? What you filled in won't be kept.")) return;
     reset();
   };
   // 處理中按取消:回到上一步,照片和框都留著(審查 F4)。模型那邊停不下來,晚回來的結果丟掉
@@ -356,7 +357,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
     // 品牌:商品頁寫的優先,統一寫法(adidas → Adidas);沒寫就用網域猜的。舊版直接塞網域「beams.co.jp」
     const brand = canonicalBrand(page.brand) || parsedLink.brand || "";
     // 品名:分享文字裡的優先;商品頁讀到的補上品牌(品名裡已經有就不重複)
-    const pageName = page.name && brand && !page.name.toLowerCase().includes(brand.toLowerCase()) ? `${page.name}(${brand})` : page.name;
+    const pageName = page.name && brand && !page.name.toLowerCase().includes(brand.toLowerCase()) ? `${page.name} (${brand})` : page.name;
     const name = parsedLink.name || pageName || "";
     // 品名猜不出分類就看網址(LONGINES 的品名沒有「錶」,網址是 /p/watch-longines-…)
     const slug = decodeURIComponent(new URL(parsedLink.url).pathname).replace(/[-_/.]+/g, " ");
@@ -375,7 +376,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
     if (chosen?.lookup) {
       fetchBrandProduct(chosen.lookup).then((product) => {
         if (!product) return;
-        const name = `${product.name}(${chosen.brand})`;
+        const name = `${product.name} (${chosen.brand})`;
         const part = partFromProduct(product.name, product.categories);
         setLink((current) => (current?.url === chosen.url ? { ...current, name, part, price: product.price || current.price || null } : current));
         setDraft((current) => {
@@ -397,7 +398,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
     const run = ++runRef.current;
     setStage("working");
     setError("");
-    setStatus("下載商品圖…");
+    setStatus("Downloading product image…");
     try {
       let response = await fetch(image.full);
       if (!response.ok) response = await fetch(image.thumb);
@@ -408,7 +409,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
     } catch (cause) {
       if (run !== runRef.current) return;
       console.error(cause);
-      setError(navigator.onLine === false ? "現在沒有網路,商品圖下載不了。" : "商品圖下載失敗。換一張,或改用截圖。");
+      setError(navigator.onLine === false ? "You're offline, so the product image can't download." : "The product image didn't download. Pick another, or use a screenshot.");
       setStage("pick");
     }
   };
@@ -434,7 +435,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
     const run = ++runRef.current;
     const alive = () => run === runRef.current;
     setError("");
-    setStatus("讀取照片…");
+    setStatus("Reading photo…");
     const fail = (message) => {
       clearTimeout(watchdogRef.current);
       setError(message);
@@ -448,7 +449,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
       watchdogRef.current = setTimeout(() => {
         if (!alive()) return;
         runRef.current += 1;
-        fail("去背模型下載停住了。檢查網路後按「再試一次」。");
+        fail("The background-removal model download stalled. Check your connection and tap “Try again”.");
       }, 60000);
     };
     try {
@@ -483,7 +484,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
         };
       });
       setStage("review");
-      setStatus("準備去背…");
+      setStatus("Getting ready to remove the background…");
       arm();
       const raw = await removeBg(input, (text, downloading) => {
         if (!alive()) return;
@@ -492,7 +493,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
       });
       if (!alive()) return;
       clearTimeout(watchdogRef.current);
-      setStatus("修邊…");
+      setStatus("Cleaning up the edges…");
       cutRef.current = { input, raw, outer, region };
       const { blob, color, secondaryColor } = await finishCutout(cutRef.current, false);
       if (!alive()) return;
@@ -540,7 +541,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
       });
     } catch (cause) {
       console.error(cause);
-      if (run === runRef.current) setError(`補滿沒有成功:${cause?.message || cause}`);
+      if (run === runRef.current) setError(`Filling in didn't work: ${cause?.message || cause}`);
     } finally {
       setRefilling(false);
     }
@@ -551,10 +552,10 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
   const fillToggle = () => draft?.blob && cutRef.current && (draft.filled || isLight(draft.color) || isLight(draft.secondaryColor)) && (
     <div className="add-fill">
       <button type="button" className="add-fill-button" onClick={toggleFill} disabled={refilling} aria-pressed={Boolean(draft.filled)}>
-        {refilling ? "補滿中…" : draft.filled ? "還原成原本的去背" : "白色衣服被去掉一塊?補滿"}
+        {refilling ? "Filling in…" : draft.filled ? "Back to the original cutout" : "Part of a white piece cut away? Fill it in"}
       </button>
       <small className="add-hint">
-        {draft.filled ? "包包背帶、手把圈起來的空隙也一起補上了;不對就還原。" : "衣服跟背景都很白時用。包包背帶圈起來的空隙也會被補上,看預覽決定。"}
+        {draft.filled ? "Gaps enclosed by bag straps or handles were filled in too; if that's wrong, go back." : "Use this when both the piece and the background are white. Gaps enclosed by bag straps get filled too, so check the preview."}
       </small>
     </div>
   );
@@ -603,9 +604,9 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
     const kind = kindLabel({ part: draft.part, name: draft.name });
     const owned = similar.filter((item) => !item.wishlist).length;
     const wished = similar.length - owned;
-    if (owned && wished) return `櫃裡已經有 ${owned} 件同色的${kind},想買的裡還有 ${wished} 件,確定還要再加?`;
-    if (owned) return `櫃裡已經有 ${owned} 件同色的${kind},確定還要再加?`;
-    return `想買的裡已經有 ${wished} 件同色的${kind},確定還要再加?`;
+    if (owned && wished) return `Already in your closet: ${owned} like this (${kind}, same color), plus ${wished} on your wishlist. Add it anyway?`;
+    if (owned) return `Already in your closet: ${owned} like this (${kind}, same color). Add it anyway?`;
+    return `Already on your wishlist: ${wished} like this (${kind}, same color). Add it anyway?`;
   };
 
   const replace = () => {
@@ -618,7 +619,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
   // over:店裡比一下的「放進想買的」「買了」直接帶著選擇存,不用先改 draft 再存
   const save = async (over = {}) => {
     const draft = { ...draftState, ...over };
-    const name = draft.name.trim() || (draft.wishlist ? "想買的單品" : "新單品");
+    const name = draft.name.trim() || (draft.wishlist ? "Wishlist piece" : "New piece");
     setError("");
     // 分類改選填(2026-10-21,行銷企劃第 0 週:MYMIKA 加一件零欄位,我們要人選分類才能存)。
     // 沒選就猜:先看品名(「襯衫」「牛仔褲」),再看去背後的長寬比;猜的標 partGuessed,衣櫃格子會提醒點一下改
@@ -653,8 +654,8 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
     } catch (cause) {
       console.error(cause);
       setError(/quota/i.test(`${cause?.name} ${cause?.message}`)
-        ? "這台裝置的空間不夠,存不下這張圖。清一點空間再按一次。"
-        : "這個瀏覽器不讓網站存衣服,無痕/私密分頁最常見。換一般分頁打開再加一次。");
+        ? "This device is out of space and can't save this image. Free up some space and tap again."
+        : "This browser won't let the site save clothes; private or incognito tabs are the usual cause. Open it in a normal tab and add it again.");
       return;
     }
     try { navigator.storage?.persist?.(); } catch { /* 不支援就算了 */ }
@@ -669,7 +670,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
     reset();
   };
 
-  const closeButton = (label = "取消") => (
+  const closeButton = (label = "Cancel") => (
     <button type="button" className="add-close" onClick={requestClose} aria-label={label}>
       <X size={20} weight="light" aria-hidden="true" />
     </button>
@@ -701,50 +702,50 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
           disabled={stage === "working"}
         >
           {stage === "working"
-            ? <><SpinnerGap size={14} className="add-spinner" aria-hidden="true" /> 處理中</>
-            : <><Plus size={14} weight="bold" aria-hidden="true" /> 新增</>}
+            ? <><SpinnerGap size={14} className="add-spinner" aria-hidden="true" /> Working</>
+            : <><Plus size={14} weight="bold" aria-hidden="true" /> Add</>}
         </button>
       )}
       {!hideButton && renderCheck && (
         <button type="button" className="add-garment-button add-store-button" onClick={openStore} disabled={stage === "working"}>
-          <Storefront size={14} weight="bold" aria-hidden="true" /> 店裡比一下
+          <Storefront size={14} weight="bold" aria-hidden="true" /> In a store?
         </button>
       )}
 
       {stage === "store" && (
-        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="在店裡比一下" ref={dialogRef}>
+        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="Compare in store" ref={dialogRef}>
           <div className="add-panel add-panel-review">
             {closeButton()}
-            <p className="add-step">在店裡比一下</p>
-            <small className="add-hint">拍一張正在看的衣服,框出來、點分類,就看到家裡有幾件像的、買了能跟哪些配。不存也可以。</small>
+            <p className="add-step">Compare in store</p>
+            <small className="add-hint">Take a photo of the piece you're looking at, crop it and pick a category. You'll see how many similar pieces you own and what it pairs with. No need to save it.</small>
             <small className="add-hint">
               {modelReady()
-                ? "照片在這台裝置上處理,不會上傳。"
+                ? "Photos are processed on this device and never uploaded."
                 : preloadsEarly()
-                  ? "第一次要下載約 80MB 的去背模型,打開這一頁就開始下載了;建議先在家用 Wi-Fi 打開這一頁一次。照片在這台裝置上處理,不會上傳。"
-                  : "第一次要下載約 80MB 的去背模型,去背時才開始下載;建議先在家用 Wi-Fi 試一次。照片在這台裝置上處理,不會上傳。"}
+                  ? "The first time, it downloads an 80 MB background-removal model, starting when you open this page; open this page once on Wi-Fi at home first. Photos are processed on this device and never uploaded."
+                  : "The first time, it downloads an 80 MB background-removal model when you remove a background; try it once on Wi-Fi at home first. Photos are processed on this device and never uploaded."}
             </small>
             <div className="add-actions">
-              <button type="button" className="secondary-button" onClick={() => inputRef.current?.click()}>從相簿選</button>
-              <button type="button" className="primary-button" onClick={() => cameraRef.current?.click()}>拍一張</button>
+              <button type="button" className="secondary-button" onClick={() => inputRef.current?.click()}>From photos</button>
+              <button type="button" className="primary-button" onClick={() => cameraRef.current?.click()}>Take a photo</button>
             </div>
           </div>
         </div>
       )}
 
       {stage === "source" && (
-        <div className="add-overlay" role="dialog" aria-modal="true" aria-label={replacing ? "換一張圖" : "新增衣物"} ref={dialogRef}>
+        <div className="add-overlay" role="dialog" aria-modal="true" aria-label={replacing ? "Change image" : "Add a piece"} ref={dialogRef}>
           <form
             className="add-panel add-panel-review"
             onSubmit={(event) => { event.preventDefault(); if (parsedLink && !parsedLink.notProduct && !pageLoading) applyLink(); }}
           >
             {closeButton()}
-            <p className="add-step">{replacing ? `換一張圖:${replacing.name || "這件"}` : "新增一件"}</p>
-            {replacing && <small className="add-hint">選一張照片或貼商品連結,框出衣服、去背之後換上。名稱、分類、顏色都不會變。</small>}
+            <p className="add-step">{replacing ? `Change image: ${replacing.name || "this piece"}` : "Add a piece"}</p>
+            {replacing && <small className="add-hint">Pick a photo or paste a product link, crop the piece, remove the background, then swap it in. Name, category and color stay the same.</small>}
             {/* 貼連結放大門(2026-10-21):網購過的不用拍(商品圖照樣去背,只是省掉拍和框);拍照是沒連結時的第二條路 */}
-            {!replacing && <small className="add-hint add-lead">網購過的衣服最快:到商品頁按「分享」拷貝連結,貼在下面,不用拍照。沒有連結的再拍照。</small>}
+            {!replacing && <small className="add-hint add-lead">Clothes you bought online are fastest: on the product page, tap “Share”, copy the link and paste it below. No photo needed. No link? Take a photo instead.</small>}
             <label className="add-field">
-              <span>貼商品連結</span>
+              <span>Paste a product link</span>
               {/* type="text" 不是 "url":App「分享」拷出來的是「快來看看【品名】… https://…」整段,
                   type="url" 會被瀏覽器當成不合法網址擋下來,按了沒反應(2026-10-03 WebKit 實測)。網址在 findUrl 裡挑出來 */}
               <input
@@ -760,22 +761,22 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             </label>
             <small className="add-hint" role="status">
               {parsedLink?.notProduct
-                ? `這是 ${parsedLink.brand} 的網址,但不是單一商品頁。打開那件商品,按分享、拷貝連結再貼。`
+                ? `That's a ${parsedLink.brand} link, but not a single product page. Open the product itself, tap Share, copy the link and paste it.`
                 : pageLoading
-                  ? "讀取商品頁…"
+                  ? "Reading the product page…"
                   : effectiveLink?.images.length
-                    ? `${effectiveLink.brand} 的商品圖抓得到${effectiveLink.page ? `(${effectiveLink.images.length} 張)` : ""}。下一步挑一張平拍的。`
+                    ? `${effectiveLink.brand} product images found${effectiveLink.page ? ` (${effectiveLink.images.length})` : ""}. Next, pick a flat-lay shot.`
                     : page?.status === "blocked"
-                      ? `這個網站擋住了自動讀取(大品牌和蝦皮常這樣),網址會存起來,接著選截圖${effectiveLink?.name ? `;品名先填「${effectiveLink.name}」` : ""}。`
+                      ? `This site blocks automatic reading (big brands and Shopee often do). The link will be saved; next, choose a screenshot${effectiveLink?.name ? `; the name starts as “${effectiveLink.name}”` : ""}.`
                       : effectiveLink?.name
-                        ? `${effectiveLink.brand || "這個網站"}的圖抓不到,品名先填「${effectiveLink.name}」,接著選截圖。`
+                        ? `Couldn't get images from ${effectiveLink.brand || "this site"}. The name starts as “${effectiveLink.name}”; next, choose a screenshot.`
                         : parsedLink
-                          ? "這頁讀不到商品圖,網址會存起來,接著選截圖。"
-                          : "貼品牌官網或購物網站的商品連結,讀得到就能直接挑圖;讀不到的(像蝦皮、Zara)用截圖。"}
+                          ? "No product images on this page. The link will be saved; next, choose a screenshot."
+                          : "Paste a product link from a brand or shopping site. If it can be read, you pick an image right away; if not (like Shopee or Zara), use a screenshot."}
             </small>
             {linkDupe && (
               <small className="add-hint add-dupe-early" role="status">
-                這件加過了:「{linkDupe.name}」{linkDupe.wishlist ? ",在想買的裡" : ",已經在衣櫃裡"}。還是可以再加一次。
+               You've added this before: “{linkDupe.name}”{linkDupe.wishlist ? ", on your wishlist" : ", already in your closet"}. You can still add it again.
               </small>
             )}
             {/* 打開這頁(open)就開始下載去背模型,所以 80MB 要在這頁講,不是等到去背中才講(2026-10-24 取捨)。
@@ -785,17 +786,17 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             {!modelReady() && (
               <small className="add-hint">
                 {preloadsEarly()
-                  ? "第一次去背要下載約 80MB 的模型,打開這一頁就開始下載了。"
-                  : "第一次去背要下載約 80MB 的模型,去背時才開始下載;用行動網路的話,建議連上 Wi-Fi 再選照片。"}
-                照片在這台裝置上處理,不會上傳。
+                  ? "The first background removal downloads an 80 MB model, starting when you open this page. "
+                  : "The first background removal downloads an 80 MB model when you start it; on mobile data, connect to Wi-Fi before choosing a photo. "}
+                Photos are processed on this device and never uploaded.
               </small>
             )}
             <div className="add-actions">
               <button type="button" className="secondary-button" onClick={() => { setLink(parsedLink?.notProduct ? null : effectiveLink ? { ...effectiveLink, images: [] } : null); inputRef.current?.click(); }}>
-                {parsedLink ? "改用照片" : "沒有連結,拍照或選照片"}
+                {parsedLink ? "Use a photo instead" : "No link? Take or choose a photo"}
               </button>
               <button type="submit" className="primary-button" disabled={!parsedLink || parsedLink.notProduct || pageLoading}>
-                {pageLoading ? "讀取中…" : effectiveLink?.images.length ? "列出商品圖" : "選截圖"}
+                {pageLoading ? "Reading…" : effectiveLink?.images.length ? "List product images" : "Choose screenshot"}
               </button>
             </div>
           </form>
@@ -803,52 +804,52 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
       )}
 
       {stage === "pick" && link && (
-        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="挑一張商品圖" ref={dialogRef}>
+        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="Pick a product image" ref={dialogRef}>
           <div className="add-panel add-panel-review">
             {closeButton()}
-            <p className="add-step">挑一張平拍的</p>
+            <p className="add-step">Pick a flat-lay shot</p>
             {link.name && <small className="add-hint">{link.name}</small>}
             <small className="add-hint">
-              衣服單獨擺著的那張去背最乾淨{link.lookup ? ",通常在最後幾張" : ""}。模特兒穿著的,人會一起留下來。
+             The shot of the piece on its own cuts out cleanest{link.lookup ? "; it's usually one of the last few" : ""}. On a model shot, the person stays in too.
             </small>
             <ImagePicker images={link.images} onPick={pickBrandImage} />
             <div className="add-actions">
-              <button type="button" className="secondary-button" onClick={() => inputRef.current?.click()}>改用截圖</button>
+              <button type="button" className="secondary-button" onClick={() => inputRef.current?.click()}>Use a screenshot instead</button>
             </div>
           </div>
         </div>
       )}
 
       {stage === "crop" && source && (
-        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="框出衣服" ref={dialogRef}>
+        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="Crop the piece" ref={dialogRef}>
           <div className="add-panel add-panel-review">
             {closeButton()}
             {/* 挑好的商品圖(2026-10-25 新訪客實測):原本跟截圖共用「截圖的話…」那句,「去背框起來的」又灰著,以為非框不可。
                 商品圖多半整張去背就好:主按鈕換成「整張去背」,框是選用的 */}
-            <p className="add-step">{brandPick ? "去背這張商品圖" : "用手指框出衣服"}</p>
+            <p className="add-step">{brandPick ? "Remove the background of this product image" : "Drag to crop the piece"}</p>
             <small className="add-hint">
               {store
-                ? "衣架、旁邊的衣服、你的手框在外面,比出來的顏色才準。"
+                ? "Leave the hanger, nearby clothes and your hand outside the box so the color comes out right."
                 : brandPick
-                  ? "商品圖直接按「整張去背」就好。圖裡有標誌或別的東西,再用手指框出衣服。"
+                  ? "For a product image, just tap “Remove whole background”. If there's a logo or something else in it, drag to crop the piece first."
                   : ownPhoto
-                    ? "衣服掛起來或攤平、拉開皺摺再拍,去背會乾淨很多。截圖的話,把狀態列、價格框在外面。"
-                    : "截圖的話,把狀態列、價格、按鈕框在外面。模特兒穿著的圖去背後人也會留下,盡量挑平拍那張。"}
-              {ownPhoto && <> <button type="button" className="add-text-button" onClick={retake}>重拍一張</button></>}
+                    ? "Hang it up or lay it flat and smooth out wrinkles before the photo; the cutout gets much cleaner. For a screenshot, leave the status bar and price outside the box."
+                    : "For a screenshot, leave the status bar, price and buttons outside the box. On a model shot the person stays after the cutout, so pick the flat-lay one if you can."}
+              {ownPhoto && <> <button type="button" className="add-text-button" onClick={retake}>Retake</button></>}
             </small>
             <CropBox src={source.url} box={box} onChange={setBox} />
-            {box !== FULL && tooSmall && <small className="add-field-error" role="status">框太小了,重新拖一個。</small>}
+            {box !== FULL && tooSmall && <small className="add-field-error" role="status">That box is too small. Drag a new one.</small>}
             <div className="add-actions">
               {brandPick ? (
                 <>
-                  <button type="button" className="secondary-button" onClick={() => cutout(box)} disabled={box === FULL || tooSmall}>去背框起來的</button>
-                  <button type="button" className="primary-button" onClick={() => cutout(FULL)}>整張去背</button>
+                  <button type="button" className="secondary-button" onClick={() => cutout(box)} disabled={box === FULL || tooSmall}>Remove background in box</button>
+                  <button type="button" className="primary-button" onClick={() => cutout(FULL)}>Remove whole background</button>
                 </>
               ) : (
                 <>
-                  <button type="button" className="secondary-button" onClick={() => cutout(FULL)}>整張去背</button>
+                  <button type="button" className="secondary-button" onClick={() => cutout(FULL)}>Remove whole background</button>
                   <button type="button" className="primary-button" onClick={() => cutout(box)} disabled={box === FULL || tooSmall}>
-                    去背框起來的
+                   Remove background in box
                   </button>
                 </>
               )}
@@ -858,32 +859,32 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
       )}
 
       {stage === "working" && (
-        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="處理中" ref={dialogRef}>
+        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="Working" ref={dialogRef}>
           <div className="add-panel">
             <SpinnerGap size={30} className="add-spinner" aria-hidden="true" />
             <p role="status" aria-live="polite">{status}</p>
             <small>
-              {modelReady() ? "" : "第一次使用要下載約 80MB 的去背模型,之後會快很多。"}
-              照片在這台裝置上處理,不會上傳。
+              {modelReady() ? "" : "The first time, it downloads an 80 MB background-removal model; after that it's much faster. "}
+              Photos are processed on this device and never uploaded.
             </small>
-            <button type="button" className="secondary-button add-cancel" onClick={cancelWork}>取消</button>
+            <button type="button" className="secondary-button add-cancel" onClick={cancelWork}>Cancel</button>
           </div>
         </div>
       )}
 
       {stage === "review" && draft && replacing && (
-        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="確認換圖" ref={dialogRef}>
+        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="Confirm new image" ref={dialogRef}>
           <div className="add-panel add-panel-review">
             {closeButton()}
-            <p className="add-step">換掉「{replacing.name || "這件"}」的圖</p>
+            <p className="add-step">Replace the image of “{replacing.name || "this piece"}”</p>
             <div className="add-replace-compare">
               <figure>
                 <img src={replacing.thumbnail || replacing.image} alt="" />
-                <figcaption>現在的</figcaption>
+                <figcaption>Current</figcaption>
               </figure>
               <figure className={draft.blob ? "" : "is-pending"}>
-                <img src={draft.preview} alt={draft.blob ? "新的圖" : "框起來的照片,還沒去背"} />
-                <figcaption>{draft.blob ? "新的" : "去背中"}</figcaption>
+                <img src={draft.preview} alt={draft.blob ? "New image" : "Cropped photo, background not removed yet"} />
+                <figcaption>{draft.blob ? "New" : "Removing background"}</figcaption>
               </figure>
             </div>
             {fillToggle()}
@@ -894,18 +895,18 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             )}
             {!draft.pending && !draft.blob && (
               <div className="add-retry" role="alert">
-                <p>{error || "去背沒有完成。"}</p>
+                <p>{error || "Background removal didn't finish."}</p>
                 <div className="add-actions">
-                  <button type="button" className="secondary-button" onClick={backToCrop}>重新框</button>
-                  <button type="button" className="primary-button" onClick={retryCutout}>再試一次</button>
+                  <button type="button" className="secondary-button" onClick={backToCrop}>Crop again</button>
+                  <button type="button" className="primary-button" onClick={retryCutout}>Try again</button>
                 </div>
               </div>
             )}
-            <small className="add-hint">名稱、分類、顏色都不變;顏色要跟著新圖改的話,換好後在編輯裡按吸色。</small>
+            <small className="add-hint">Name, category and color stay the same. If the color should follow the new image, use the color picker in edit mode afterward.</small>
             <div className="add-actions">
-              <button type="button" className="secondary-button" onClick={requestClose}>取消</button>
+              <button type="button" className="secondary-button" onClick={requestClose}>Cancel</button>
               <button type="button" className="primary-button" onClick={replace} disabled={!draft.blob}>
-                {draft.blob ? "換上這張" : "去背好就能換"}
+                {draft.blob ? "Use this image" : "Ready once the background is removed"}
               </button>
             </div>
           </div>
@@ -913,11 +914,11 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
       )}
 
       {stage === "review" && draft && store && (
-        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="在店裡比一下:結果" ref={dialogRef}>
+        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="Compare in store: result" ref={dialogRef}>
           <div className="add-panel add-panel-review">
-            {closeButton("不用了")}
+            {closeButton("Never mind")}
             <div className={draft.blob ? "add-preview-wrap add-store-preview" : "add-preview-wrap add-store-preview is-pending"}>
-              <img className="add-preview" src={draft.preview} alt={draft.blob ? "去背結果" : "框起來的照片,還沒去背"} />
+              <img className="add-preview" src={draft.preview} alt={draft.blob ? "Cutout result" : "Cropped photo, background not removed yet"} />
               {draft.pending && (
                 <p className="add-preview-status" role="status" aria-live="polite">
                   <SpinnerGap size={16} className="add-spinner" aria-hidden="true" />{status}
@@ -926,16 +927,16 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             </div>
             {!draft.pending && !draft.blob && (
               <div className="add-retry" role="alert">
-                <p>{error || "去背沒有完成。"}</p>
+                <p>{error || "Background removal didn't finish."}</p>
                 <div className="add-actions">
-                  <button type="button" className="secondary-button" onClick={backToCrop}>重新框</button>
-                  <button type="button" className="primary-button" onClick={retryCutout}>再試一次</button>
+                  <button type="button" className="secondary-button" onClick={backToCrop}>Crop again</button>
+                  <button type="button" className="primary-button" onClick={retryCutout}>Try again</button>
                 </div>
               </div>
             )}
 
             <fieldset className="add-store-parts">
-              <legend>這件是</legend>
+              <legend>This piece is</legend>
               {STORE_PARTS.map((part) => (
                 <label key={part}>
                   <input
@@ -950,9 +951,9 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
               <select
                 value={STORE_PARTS.includes(draft.part) ? "" : draft.part}
                 onChange={(event) => setDraft((current) => ({ ...current, part: event.target.value, kind: "", fit: "" }))}
-                aria-label="其他分類"
+                aria-label="Other categories"
               >
-                <option value="">其他…</option>
+                <option value="">Other…</option>
                 {PART_ORDER.filter((part) => !STORE_PARTS.includes(part)).map((part) => (
                   <option key={part} value={part}>{PARTS[part].label}</option>
                 ))}
@@ -961,7 +962,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
 
             {kindChoices(draft.part).length > 0 && (
               <fieldset className="add-store-parts">
-                <legend>款式(點了比得準很多,不點就只看分類和顏色)</legend>
+                <legend>Style (comparisons get much more accurate if you pick one; otherwise only category and color count)</legend>
                 {kindChoices(draft.part).map((kind) => (
                   <label key={kind}>
                     <input type="radio" name="store-kind" checked={draft.kind === kind} onChange={() => setDraft((current) => ({ ...current, kind }))} />
@@ -972,30 +973,30 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             )}
             {fitChoices(draft.part).length > 0 && (
               <fieldset className="add-store-parts">
-                <legend>版型</legend>
+                <legend>Fit</legend>
                 {["", ...fitChoices(draft.part)].map((fit) => (
                   <label key={fit || "none"}>
                     <input type="radio" name="store-fit" checked={(draft.fit || "") === fit} onChange={() => setDraft((current) => ({ ...current, fit }))} />
-                    <span>{fit || "看不出來"}</span>
+                    <span>{fit || "Can't tell"}</span>
                   </label>
                 ))}
               </fieldset>
             )}
 
             <label className="add-field">
-              <span>品牌或備註(選填)</span>
+              <span>Brand or note (optional)</span>
               <input
                 value={draft.name}
                 onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-                placeholder="例:UNIQLO 牛津"
+                placeholder="E.g. UNIQLO oxford"
               />
             </label>
 
             <div className="add-store-result" aria-live="polite">
               {!draft.part
-                ? <p className="add-hint">點上面的分類,就開始比。</p>
+                ? <p className="add-hint">Pick a category above to start comparing.</p>
                 : !draft.blob
-                  ? <p className="add-hint">{draft.pending ? "去背好就開始比:顏色要看去背後的衣服,不看背景。" : "去背沒有完成,比不了顏色。"}</p>
+                  ? <p className="add-hint">{draft.pending ? "Comparing starts once the background is removed: the color comes from the cutout, not the background." : "Background removal didn't finish, so the color can't be compared."}</p>
                   : (
                     <>
                       {renderCheck({
@@ -1003,28 +1004,28 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
                         tags: [], image: draft.preview, thumbnail: draft.preview, wishlist: true,
                       }, existing.filter((item) => !item.wishlist))}
                       <StoreTryOn draft={draft} />
-                      <small className="add-hint">店裡的燈光、明暗跟在家拍的不一樣,所以這裡比的是「顏色相近」:深藍和黑、米白和白可能一起出現,看縮圖判斷。</small>
+                      <small className="add-hint">Store lighting differs from photos taken at home, so this compares “similar color”: navy and black, or off-white and white, may show up together. Judge by the thumbnails.</small>
                     </>
                   )}
             </div>
 
             <div className="add-actions add-store-actions">
-              <button type="button" className="secondary-button" onClick={reset}>不用了</button>
-              <button type="button" className="primary-button" onClick={() => save({ wishlist: true, dream: false, name: storeName(draft) })} disabled={!draft.part || !draft.blob}>放進想買的</button>
+              <button type="button" className="secondary-button" onClick={reset}>Never mind</button>
+              <button type="button" className="primary-button" onClick={() => save({ wishlist: true, dream: false, name: storeName(draft) })} disabled={!draft.part || !draft.blob}>Add to wishlist</button>
             </div>
             <button type="button" className="add-store-bought" onClick={() => save({ wishlist: false, dream: false, name: storeName(draft) })} disabled={!draft.part || !draft.blob}>
-              買了,直接加進衣櫃
+             Bought it, add to closet
             </button>
           </div>
         </div>
       )}
 
       {stage === "review" && draft && !replacing && !store && (
-        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="確認新增的衣物" ref={dialogRef}>
+        <div className="add-overlay" role="dialog" aria-modal="true" aria-label="Confirm the new piece" ref={dialogRef}>
           <div className="add-panel add-panel-review">
             {closeButton()}
             <div className={draft.blob ? "add-preview-wrap" : "add-preview-wrap is-pending"}>
-              <img className="add-preview" src={draft.preview} alt={draft.blob ? "去背結果預覽" : "框起來的照片,還沒去背"} />
+              <img className="add-preview" src={draft.preview} alt={draft.blob ? "Cutout preview" : "Cropped photo, background not removed yet"} />
               {draft.pending && (
                 <p className="add-preview-status" role="status" aria-live="polite">
                   <SpinnerGap size={16} className="add-spinner" aria-hidden="true" />{status}
@@ -1034,22 +1035,22 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             {fillToggle()}
             {ownPhoto && draft.blob && (
               <small className="add-hint add-retake">
-                看起來皺皺的?掛起來或拉平再拍一張,名稱和分類會留著。{" "}
-                <button type="button" className="add-text-button" onClick={retake}>重拍一張</button>
+               Looks wrinkled? Hang it up or smooth it out and take another; the name and category will stay.{" "}
+                <button type="button" className="add-text-button" onClick={retake}>Retake</button>
               </small>
             )}
             {draft.pending && (
               <small className="add-hint">
-                {modelReady() ? "去背中,趁這段時間先填名稱和分類。" : "第一次要下載約 80MB 的去背模型,趁這段時間先填名稱和分類。"}
-                照片在這台裝置上處理,不會上傳。
+                {modelReady() ? "Removing the background. Fill in the name and category meanwhile. " : "The first time, it downloads an 80 MB background-removal model. Fill in the name and category meanwhile. "}
+                Photos are processed on this device and never uploaded.
               </small>
             )}
             {!draft.pending && !draft.blob && (
               <div className="add-retry" role="alert">
-                <p>{error || "去背沒有完成。"}</p>
+                <p>{error || "Background removal didn't finish."}</p>
                 <div className="add-actions">
-                  <button type="button" className="secondary-button" onClick={backToCrop}>重新框</button>
-                  <button type="button" className="primary-button" onClick={retryCutout}>再試一次</button>
+                  <button type="button" className="secondary-button" onClick={backToCrop}>Crop again</button>
+                  <button type="button" className="primary-button" onClick={retryCutout}>Try again</button>
                 </div>
               </div>
             )}
@@ -1057,7 +1058,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             {/* 「已經有了」排第一(2026-10-25 新訪客實測:排最後、窄螢幕掉到第二行還縮排不同,預設選中的那個反而最難看到)。
                 順序 = 有了 → 想買 → 夢幻逸品;「這件」自己一行 */}
             <fieldset className="add-owned">
-              <legend>這件</legend>
+              <legend>This piece</legend>
               <label>
                 <input
                   type="radio"
@@ -1065,7 +1066,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
                   checked={!draft.wishlist}
                   onChange={() => setDraft((current) => ({ ...current, wishlist: false, dream: false }))}
                 />
-                已經有了
+               I own it
               </label>
               <label>
                 <input
@@ -1074,7 +1075,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
                   checked={draft.wishlist && !draft.dream}
                   onChange={() => setDraft((current) => ({ ...current, wishlist: true, dream: false }))}
                 />
-                想買
+               Want it
               </label>
               <label>
                 <input
@@ -1083,27 +1084,27 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
                   checked={draft.wishlist && Boolean(draft.dream)}
                   onChange={() => setDraft((current) => ({ ...current, wishlist: true, dream: true }))}
                 />
-                夢幻逸品
+               Dream piece
               </label>
             </fieldset>
 
             <label className="add-field">
-              <span>名稱</span>
+              <span>Name</span>
               <input
                 value={draft.name}
                 onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-                placeholder={draft.wishlist ? "例:GU 寬版牛仔褲" : "例:白色帆布鞋"}
+                placeholder={draft.wishlist ? "E.g. GU wide-leg jeans" : "E.g. white canvas sneakers"}
               />
             </label>
 
             <label className="add-field">
-              <span>品牌</span>
+              <span>Brand</span>
               <input
                 value={draft.brand || ""}
                 list="add-brand-options"
                 autoComplete="off"
                 onChange={(event) => setDraft((current) => ({ ...current, brand: event.target.value }))}
-                placeholder={brandOf({ name: draft.name }) ? `看品名是 ${brandOf({ name: draft.name })},不用填` : "選填,例:UNIQLO"}
+                placeholder={brandOf({ name: draft.name }) ? `The name says ${brandOf({ name: draft.name })}, no need to fill this in` : "Optional, e.g. UNIQLO"}
               />
               <datalist id="add-brand-options">{brandSuggestions(existing).map((brand) => <option key={brand} value={brand} />)}</datalist>
             </label>
@@ -1112,30 +1113,30 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
               value={draft.price}
               currency={draft.priceCurrency}
               onChange={(price, priceCurrency) => setDraft((current) => ({ ...current, price, priceCurrency }))}
-              hint={link?.price ? "從商品頁讀到的,可以改" : link?.url ? "商品頁讀不到價錢,知道的話自己填" : "選填"}
+              hint={link?.price ? "Read from the product page; you can change it" : link?.url ? "No price on the product page; fill it in if you know it" : "Optional"}
             />
 
             <label className="add-field">
-              <span>分類</span>
+              <span>Category</span>
               <select
                 value={draft.part}
                 onChange={(event) => setDraft((current) => ({ ...current, part: event.target.value }))}
               >
-                <option value="">不選,幫我猜</option>
+                <option value="">Skip, guess for me</option>
                 {PART_GROUPS.map((group) => (
                   <optgroup key={group.id} label={group.label}>
                     {group.parts.map((part) => (
-                      <option key={part} value={part}>{PARTS[part].label}{PARTS[part].hint ? `(${PARTS[part].hint})` : ""}</option>
+                      <option key={part} value={part}>{PARTS[part].label}{PARTS[part].hint ? ` (${PARTS[part].hint})` : ""}</option>
                     ))}
                   </optgroup>
                 ))}
               </select>
-              {!draft.part && <small className="add-hint">不選也能存:會照品名和形狀猜一個,猜錯在衣櫃裡點那件改。</small>}
+              {!draft.part && <small className="add-hint">You can save without one: it guesses from the name and shape. If it guesses wrong, open the piece in the closet and change it.</small>}
             </label>
 
             {draft.wishlist && (
               <label className="add-field">
-                <span>商品網址(選填,之後點得回去買)</span>
+                <span>Product link (optional, so you can get back to buy it)</span>
                 <input
                   type="text"
                   inputMode="url"
@@ -1150,28 +1151,28 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             )}
 
             {draft.wishlist && link?.url && (
-              <small className="add-hint">品牌的照片不會出現在公開的衣櫃。</small>
+              <small className="add-hint">Brand photos don't show in a public closet.</small>
             )}
 
             {dupes.length > 0 && (
               <div className="add-dupe" role="status">
                 <p>
                   {sameLink
-                    ? `這個連結已經加過了:「${sameLink.name}」${sameLink.wishlist ? ",在想買的裡" : ",已經在衣櫃裡"}。`
+                    ? `This link was added before: “${sameLink.name}”${sameLink.wishlist ? ", on your wishlist" : ", already in your closet"}.`
                     : similarText()}
                 </p>
                 <div className="add-dupe-thumbs">
                   {dupes.slice(0, 4).map((item) => (
                     <img key={item.id} src={item.thumbnail || item.image} alt={item.name} title={item.name} />
                   ))}
-                  {dupes.length > 4 && <span>還有 {dupes.length - 4} 件</span>}
+                  {dupes.length > 4 && <span>+{dupes.length - 4} more</span>}
                 </div>
                 {/* 同一款又買了一件(2026-10-06):不另存一格,原本那件數量 +1 */}
                 {onAddOne && !draft.wishlist && (sameLink && !sameLink.wishlist ? [sameLink] : sameStyle).some((item) => !item.wishlist) && (() => {
                   const target = (sameLink && !sameLink.wishlist ? [sameLink] : sameStyle).find((item) => !item.wishlist);   // 同一個連結、或同一款的那件(已經有的,不是想買的)
                   return (
                     <button type="button" className="add-dupe-one" onClick={() => { onAddOne(target); reset(); }}>
-                      是同一款:不另存,「{target.name || "那件"}」數量 +1
+                     Same piece: don't save a new one, make “{target.name || "that piece"}” quantity +1
                     </button>
                   );
                 })()}
@@ -1179,9 +1180,9 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             )}
 
             <div className="add-actions">
-              <button type="button" className="secondary-button" onClick={requestClose}>取消</button>
+              <button type="button" className="secondary-button" onClick={requestClose}>Cancel</button>
               <button type="button" className="primary-button" onClick={() => save()} disabled={urlInvalid || !draft.blob}>
-                {!draft.blob ? "去背好就能存" : dupes.length ? "還是要存" : draft.wishlist ? (draft.dream ? "放進夢幻逸品" : "放進想買的") : "加入衣櫃"}
+                {!draft.blob ? "Save once the background is removed" : dupes.length ? "Save anyway" : draft.wishlist ? (draft.dream ? "Add to Dream pieces" : "Add to wishlist") : "Add to closet"}
               </button>
             </div>
           </div>

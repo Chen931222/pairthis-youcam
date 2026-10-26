@@ -12,27 +12,27 @@ const timeText = (iso) => {
   if (!iso) return "";
   const date = new Date(iso);
   return date.toDateString() === new Date().toDateString()
-    ? date.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })
-    : date.toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    ? date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+    : date.toLocaleString("en-US", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
 };
 
 /* 現在這一步怎麼講(2026-10-07 本人:看不出現在在做什麼、有沒有同步完成) */
 const stepText = (step) => {
-  if (!step || step.phase === "start") return "跟雲端比對…";
-  if (step.phase === "push") return step.total > 1 ? `把這台的圖傳上去 ${Math.min(step.done + 1, step.total)} / ${step.total}…` : "把這台的圖傳上去…";
-  if (step.phase === "pull") return step.total > 1 ? `從雲端拿衣服 ${Math.min(step.done + 1, step.total)} / ${step.total}…` : "從雲端拿衣服…";
+  if (!step || step.phase === "start") return "Comparing with the cloud…";
+  if (step.phase === "push") return step.total > 1 ? `Uploading this device's images ${Math.min(step.done + 1, step.total)} / ${step.total}…` : "Uploading this device's images…";
+  if (step.phase === "pull") return step.total > 1 ? `Getting clothes from the cloud ${Math.min(step.done + 1, step.total)} / ${step.total}…` : "Getting clothes from the cloud…";
   return "";
 };
 
 /* 同步碼打到哪了:一直顯示格式,打錯當場講,不用等按了「加入」才知道 */
 const codeHint = (typed) => {
   const code = normalizeCode(typed);
-  if (!code) return { text: "16 個英文字母和數字,4 個一組。連字號、大小寫都不用管。不會有 0、O、1、I。" };
+  if (!code) return { text: "16 letters and digits in groups of 4. Hyphens and case don't matter. There's no 0, O, 1 or I." };
   const lookalike = code.match(/[01OI]/)?.[0];
-  if (lookalike) return { text: `同步碼裡沒有「${lookalike}」:0、O、1、I 這四個都不會出現,是長得像的別的字,再對一次。`, bad: true };
-  if (code.length < 16) return { text: `已打 ${code.length} / 16 個字。` };
-  if (code.length > 16) return { text: `多打了 ${code.length - 16} 個字(現在 ${code.length} 個,要 16 個)。`, bad: true };
-  return { text: "格式對了。", ok: true };
+  if (lookalike) return { text: `Sync codes have no “${lookalike}”: 0, O, 1 and I never appear, so it's a look-alike character. Check again.`, bad: true };
+  if (code.length < 16) return { text: `${code.length} / 16 characters.` };
+  if (code.length > 16) return { text: `${code.length - 16} too many (${code.length} now, 16 needed).`, bad: true };
+  return { text: "Format looks right.", ok: true };
 };
 
 export function SyncPanel({ canStart = true }) {
@@ -93,11 +93,11 @@ export function SyncPanel({ canStart = true }) {
     if (!isValidCode(next)) {
       // 打了 16 個字卻被說不對,多半是把長得像的字打成 0、O、1、I:同步碼裡不會有這四個(審查 F62)
       const lookalike = next.length === 16 && /[01OI]/.test(next);
-      setStatus({ error: lookalike ? "同步碼裡不會有 0、O、1、I 這四個字,是長得像的別的字,再對一次" : `同步碼是 16 個英文字母和數字,現在是 ${next.length} 個,再對一次` });
+      setStatus({ error: lookalike ? "Sync codes never contain 0, O, 1 or I; it's a look-alike character. Check again" : `A sync code is 16 letters and digits; this has ${next.length}. Check again` });
       return;
     }
     setStatus(null);
-    act("加入中…", async () => {
+    act("Joining…", async () => {
       const result = await joinSync(next);
       if (!result.error && !canStart) setStatus({ joined: true, pulled: result.pulled || 0 });   // 重新整理之前那一下也講
       if (!result.error) {
@@ -115,17 +115,17 @@ export function SyncPanel({ canStart = true }) {
   };
 
   const rotate = () => {
-    if (!confirm("換一組新碼?舊碼會立刻失效,其他裝置要用新碼重新加入。")) return;
-    act("換碼中…", async () => { await rotateCode(); setShowCode(true); });
+    if (!confirm("Switch to a new code? The old code stops working right away, and other devices need to rejoin with the new one.")) return;
+    act("Changing code…", async () => { await rotateCode(); setShowCode(true); });
   };
 
   const removeCloud = () => {
-    if (!confirm("刪掉雲端那份?這台的衣服都還在,只是不再同步;其他裝置下次打開也會停止同步。")) return;
-    act("刪除中…", async () => { await deleteCloud(); setShowCode(false); setStatus(null); });
+    if (!confirm("Delete the cloud copy? Clothes on this device stay, they just stop syncing; other devices stop syncing the next time they open.")) return;
+    act("Deleting…", async () => { await deleteCloud(); setShowCode(false); setStatus(null); });
   };
 
   const stop = () => {
-    if (!confirm("這台停止同步?衣服會留在這台,雲端那份也還在,其他裝置照常同步。")) return;
+    if (!confirm("Stop syncing on this device? Clothes stay here, the cloud copy stays too, and other devices keep syncing.")) return;
     stopSync();
     setCode(null);
     setShowCode(false);
@@ -134,23 +134,23 @@ export function SyncPanel({ canStart = true }) {
 
   // 最上面一行:現在是什麼狀態。進行中 > 剛加入 > 出錯 > 已同步 > 還沒開
   const hint = codeHint(typed);
-  const working = busy || (code && step ? "同步中" : "");
+  const working = busy || (code && step ? "Syncing" : "");
   let state = null;
   if (working) {
-    const detail = busy === "換碼中…" ? "整個衣櫃搬到新碼…" : busy === "刪除中…" ? "" : stepText(step);
+    const detail = busy === "Changing code…" ? "Moving the whole closet to the new code…" : busy === "Deleting…" ? "" : stepText(step);
     state = { kind: "busy", label: working.replace(/…$/, ""), detail };
   } else if (status?.joined) {
-    state = { kind: "ok", label: "加入了", detail: status.pulled ? `從另一台拿到 ${status.pulled} 件,重新整理中…` : "重新整理中…" };
+    state = { kind: "ok", label: "Joined", detail: status.pulled ? `Got ${status.pulled} from the other device. Reloading…` : "Reloading…" };
   } else if (status?.error) {
-    state = { kind: "error", label: code ? "沒有同步成功" : "加入失敗", detail: status.stopped || !code ? status.error : `這台的改動還沒上去。${status.error}` };
+    state = { kind: "error", label: code ? "Sync didn't work" : "Couldn't join", detail: status.stopped || !code ? status.error : `This device's changes haven't been uploaded yet. ${status.error}` };
   } else if (code && status?.at) {
     const parts = [timeText(status.at)];
-    if (status.pulled) parts.push(`從其他裝置拿到 ${status.pulled} 件`);
-    state = { kind: "ok", label: "已同步完成", detail: `${parts.join(",")}。這台和雲端一樣。` };
+    if (status.pulled) parts.push(`Got ${status.pulled} from other devices`);
+    state = { kind: "ok", label: "Synced", detail: `${parts.join(", ")}. This device matches the cloud.` };
   } else if (code) {
-    state = { kind: "ok", label: "已開同步", detail: "還沒同步過,按「立即同步」。" };
+    state = { kind: "ok", label: "Sync is on", detail: "Not synced yet. Tap “Sync now”." };
   } else if (canStart && !joining) {
-    state = { kind: "off", label: "這台還沒開同步", detail: "" };
+    state = { kind: "off", label: "Sync isn't on for this device", detail: "" };
   }
 
   return (
@@ -165,15 +165,15 @@ export function SyncPanel({ canStart = true }) {
       <div className="studio-backup-controls">
         {code ? (
           <>
-            <button type="button" disabled={Boolean(busy)} onClick={() => act("同步中…", syncNow)}>{busy || "立即同步"}</button>
-            <button type="button" onClick={() => setShowCode((on) => !on)}>{showCode ? "收起" : "看同步碼"}</button>
-            <button type="button" disabled={Boolean(busy)} onClick={stop}>停止</button>
+            <button type="button" disabled={Boolean(busy)} onClick={() => act("Syncing…", syncNow)}>{busy || "Sync now"}</button>
+            <button type="button" onClick={() => setShowCode((on) => !on)}>{showCode ? "Hide" : "Show sync code"}</button>
+            <button type="button" disabled={Boolean(busy)} onClick={stop}>Stop</button>
           </>
         ) : (
           canStart && (
             <>
-              <button type="button" disabled={Boolean(busy)} onClick={() => act("開通中…", startSync)}>{busy && !joining ? busy : "開始同步"}</button>
-              <button type="button" onClick={() => setJoining((on) => !on)}>輸入同步碼</button>
+              <button type="button" disabled={Boolean(busy)} onClick={() => act("Setting up…", startSync)}>{busy && !joining ? busy : "Start syncing"}</button>
+              <button type="button" onClick={() => setJoining((on) => !on)}>Enter sync code</button>
             </>
           )
         )}
@@ -182,7 +182,7 @@ export function SyncPanel({ canStart = true }) {
 
       {joining && !code && (
         <form className="studio-sync-join" onSubmit={join}>
-          <label htmlFor="sync-code-input">另一台的同步碼</label>
+          <label htmlFor="sync-code-input">Sync code from another device</label>
           <input
             id="sync-code-input"
             value={typed}
@@ -195,7 +195,7 @@ export function SyncPanel({ canStart = true }) {
             aria-describedby="sync-code-hint"
             aria-invalid={hint.bad || undefined}
           />
-          <button type="submit" disabled={Boolean(busy)}>{busy || "加入"}</button>
+          <button type="submit" disabled={Boolean(busy)}>{busy || "Join"}</button>
           <small id="sync-code-hint" className={`sync-code-hint${hint.bad ? " is-bad" : hint.ok ? " is-ok" : ""}`}>{hint.text}</small>
         </form>
       )}
@@ -204,22 +204,22 @@ export function SyncPanel({ canStart = true }) {
         <div className="studio-sync-manage">
           <p className="studio-sync-code">{formatCode(code)}</p>
           <div className="studio-backup-controls">
-            <button type="button" disabled={Boolean(busy)} onClick={rotate}>換新碼</button>
-            <button type="button" disabled={Boolean(busy)} onClick={removeCloud}>刪除雲端那份</button>
+            <button type="button" disabled={Boolean(busy)} onClick={rotate}>New code</button>
+            <button type="button" disabled={Boolean(busy)} onClick={removeCloud}>Delete cloud copy</button>
           </div>
           <p className="studio-backup-note studio-sync-warning">
-            這組碼等於整個衣櫃的鑰匙:拿到的人看得到也改得到你的衣服。不要截圖、不要用訊息傳;要加新裝置,看著這裡打進去。
-            給錯人或覺得外流了,按「換新碼」,舊碼立刻失效。一分鐘後、或切到別的 app 時會自動收起。
+           This code is the key to your whole closet: whoever has it can see and change your clothes. Don't screenshot it or send it in a message; to add a device, type it in while looking at this screen.
+            If it went to the wrong person or you think it leaked, tap “New code” and the old one stops working right away. This closes by itself after a minute, or when you switch to another app.
           </p>
         </div>
       )}
 
       <p className="studio-backup-note">
         {code
-          ? "另一台打開入口右上「同步」,輸入這組碼就會看到同一個衣櫃。拿到碼的人都看得到、改得到,不要貼到公開的地方。"
+          ? "On the other device, open “Sync” at the top right of the home screen and enter this code to see the same closet. Anyone with the code can see and change it, so don't post it anywhere public."
           : canStart
-            ? "自己加的衣服、想買的、穿著紀錄和收藏會加密後存到雲端,只有輸入同步碼的裝置解得開,手機和平板就會一樣。"
-            : "同步只給站主自己的裝置用:在已經同步的那台按「看同步碼」,把碼打在這裡。要把你加的衣服搬到另一台,用搭配頁最下面的「匯出備份」「匯入備份」。"}
+            ? "Clothes you added, your wishlist, wear log and saved outfits are encrypted before they go to the cloud. Only devices with the sync code can open them, so your phone and tablet stay the same."
+            : "Sync is only for the site owner's own devices: on a device that already syncs, tap “Show sync code” and type the code here. To move clothes you added to another device, use “Export backup” and “Import backup” at the bottom of the Outfits page."}
       </p>
     </div>
   );

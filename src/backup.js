@@ -15,14 +15,14 @@ const SYNC_PREFIX = "open-wardrobe-sync-";
 // 「備份過沒」也只對這台成立(open-wardrobe-backup-mark-v1)
 // 站主衣櫃存在這台的那份(App.jsx 的 CLOSET_CACHE_KEY)只是快取,也不進備份
 const DEVICE_ONLY = new Set(["open-wardrobe-bgmodel-v1", "open-wardrobe-keep-hint-v1", "open-wardrobe-backup-mark-v1", "open-wardrobe-closet-cache-v1"]);
-const JSON_NAME = "衣櫃備份.json";
+const JSON_NAME = "closet-backup.json";
 
 /* 加密備份(2026-10-06 資安盤點:備份 ZIP 裡有每件衣服的圖和紀錄,沒加密)。可選的:一般的 ZIP 照舊,
    解開就有 PNG(本人 10-04 要的);加密的那份還是一個 ZIP(iPhone 的「檔案」認得、選得到),
    裡面只有一份說明和一團密文,要回網站「匯入備份」輸入密碼才解得開。
    密碼 → PBKDF2-SHA256 60 萬次 → AES-GCM。密碼忘了就打不開,網站作者也救不回來。 */
-const LOCKED_NAME = "衣櫃備份.加密";
-const LOCKED_README = "這是加了密碼的衣櫃備份。\n到 https://pairthis.app 搭配頁最下面按「匯入備份」選這個檔,再輸入匯出時設的密碼。\n網站不保存這組密碼,忘了就解不開。\n";
+const LOCKED_NAME = "closet-backup.locked";
+const LOCKED_README = "This is a password-protected closet backup.\nGo to https://pairthis-youcam.vercel.app, open the Outfits page, tap “Import backup” at the bottom, choose this file and enter the password you set when exporting.\nThe site doesn't keep this password; if you forget it, the backup can't be opened.\n";
 const LOCK_MAGIC = new TextEncoder().encode("WRDLOCK1");
 const LOCK_ROUNDS = 600000;
 
@@ -39,11 +39,11 @@ async function lockBytes(bytes, password) {
   return out;
 }
 async function unlockBytes(bytes, password) {
-  if (bytes.length < 36 || !LOCK_MAGIC.every((byte, index) => bytes[index] === byte)) throw new Error("這份加密備份壞了");
+  if (bytes.length < 36 || !LOCK_MAGIC.every((byte, index) => bytes[index] === byte)) throw new Error("This encrypted backup is damaged");
   try {
     return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: bytes.slice(24, 36) }, await lockKey(password, bytes.slice(8, 24)), bytes.slice(36)));
   } catch {
-    throw new Error("密碼不對");
+    throw new Error("Wrong password");
   }
 }
 
@@ -59,11 +59,11 @@ function collectLocal() {
 
 /* 檔名:拿品名,去掉檔案系統不收的字,太長截掉;同名的加 -2、-3 */
 function fileNameFor(name, used) {
-  const base = (String(name || "").replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").replace(/\s+/g, " ").trim() || "單品").slice(0, 50);
+  const base = (String(name || "").replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").replace(/\s+/g, " ").trim() || "piece").slice(0, 50);
   let candidate = base, n = 2;
   while (used.has(candidate.toLowerCase())) candidate = `${base}-${n++}`;
   used.add(candidate.toLowerCase());
-  return `衣服/${candidate}.png`;
+  return `clothes/${candidate}.png`;
 }
 
 /* 自己加的衣服幾乎都是去背後存的 PNG;不是的(很舊的資料、別處匯入的)轉成 PNG,解開才都能直接用 */
@@ -105,14 +105,14 @@ export async function downloadBackupZip({ password = null } = {}) {
   const count = built.count;
   const zip = password
     ? createZip([
-      { name: "請先讀我.txt", data: new TextEncoder().encode(LOCKED_README) },
+      { name: "README.txt", data: new TextEncoder().encode(LOCKED_README) },
       { name: LOCKED_NAME, data: await lockBytes(new Uint8Array(await built.zip.arrayBuffer()), password) },
     ])
     : built.zip;
   const url = URL.createObjectURL(zip);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `wardrobe-backup-${new Date().toISOString().slice(0, 10)}${password ? "-加密" : ""}.zip`;
+  anchor.download = `wardrobe-backup-${new Date().toISOString().slice(0, 10)}${password ? "-encrypted" : ""}.zip`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
@@ -128,17 +128,17 @@ export async function readBackupFile(file, askPassword = null) {
   let files = await readZip(bytes);
   if (files.has(LOCKED_NAME)) {
     const password = askPassword ? await askPassword() : null;
-    if (!password) throw new Error("沒輸入密碼,沒有匯入");
+    if (!password) throw new Error("No password entered, nothing imported");
     files = await readZip(await unlockBytes(files.get(LOCKED_NAME), password));
   }
   const jsonName = files.has(JSON_NAME) ? JSON_NAME : [...files.keys()].find((name) => name.endsWith(".json"));
-  if (!jsonName) throw new Error("ZIP 裡沒有備份紀錄(衣櫃備份.json)");
+  if (!jsonName) throw new Error("No backup record in the ZIP (closet-backup.json)");
   return { backup: JSON.parse(new TextDecoder().decode(files.get(jsonName))), files };
 }
 
 /** 把備份寫回這台瀏覽器(覆蓋同名紀錄)。呼叫端負責之後 reload 讓畫面吃到新資料。 */
 export async function restoreBackup(backup, files = null) {
-  if (!backup || backup.format !== FORMAT) throw new Error("這不是衣櫃備份檔");
+  if (!backup || backup.format !== FORMAT) throw new Error("This isn't a closet backup file");
   if (backup.local && typeof backup.local === "object") {
     for (const [key, value] of Object.entries(backup.local)) {
       if (key.startsWith(LS_PREFIX) && !key.startsWith(SYNC_PREFIX) && !DEVICE_ONLY.has(key) && typeof value === "string") localStorage.setItem(key, value);
@@ -160,14 +160,14 @@ export async function restoreBackup(backup, files = null) {
  *  @param syncOn 這台開了同步沒(開了的話,匯入的東西會傳到每一台) */
 export async function importBackupFile(file, syncOn = false) {
   // 講清楚會發生的三件事(審查 F42):舊版只說「這台瀏覽器」,開了同步其實會傳到每一台
-  const synced = syncOn ? "\n・開了同步,這些會傳到你的每一台裝置。" : "";
-  if (!window.confirm(`匯入這份備份?\n・備份裡的衣服會加回來,包括之後刪掉的。\n・穿著紀錄、收藏、微調會換回備份當時的版本。${synced}`)) return null;
+  const synced = syncOn ? "\n• Sync is on, so this goes to every one of your devices." : "";
+  if (!window.confirm(`Import this backup?\n• Clothes in the backup come back, including ones you deleted later.\n• Wear log, saved outfits and adjustments go back to the backup's version.${synced}`)) return null;
   try {
-    const { backup, files } = await readBackupFile(file, async () => window.prompt("這份備份加了密碼。輸入匯出時設的密碼:"));
+    const { backup, files } = await readBackupFile(file, async () => window.prompt("This backup has a password. Enter the password you set when exporting:"));
     await restoreBackup(backup, files);
     setTimeout(() => window.location.reload(), 800);
-    return "已還原,重新整理讓紀錄生效…";
+    return "Restored. Reloading so the records take effect…";
   } catch (cause) {
-    return `匯入失敗:${cause?.message || "檔案格式不對"}`;
+    return `Import failed: ${cause?.message || "wrong file format"}`;
   }
 }

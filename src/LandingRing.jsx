@@ -15,7 +15,7 @@ import { Logo } from "./Brand.jsx";
 //   - 點聚焦中的衣服或資訊卡 → 開完整詳情(ItemViewer);點空白處 → 退回圓環
 //   所有移動都是一次性 CSS transition(900ms),不是持續動畫。
 const PICK = 12;
-const SLOT_LABEL = { upperbody: "上衣", wholebody_up: "外套", lowerbody: "下身", socks: "襪子", shoes: "鞋子", bag: "包款", eyewear: "眼鏡", wrist: "手錶手環", belt: "皮帶", necklace: "項鍊", ring: "戒指", accessories_up: "配件", carry: "小物" };
+const SLOT_LABEL = { upperbody: "Top", wholebody_up: "Outerwear", lowerbody: "Bottoms", socks: "Socks", shoes: "Shoes", bag: "Bag", eyewear: "Eyewear", wrist: "Wrist", belt: "Belt", necklace: "Necklace", ring: "Ring", accessories_up: "Accessory", carry: "Carry" };
 
 // 每類單品的「基準寬度」,以上衣攤平肩寬為 1.0(現實約 55cm)。
 // 只定義寬度 —— 高度交給照片本身的長寬比推算,所以長褲自然比短褲長、
@@ -76,7 +76,7 @@ const ROW_MAX = 3;
  */
 /** @param feedback 回報鈕(App 給,站主模式是 null):放在左上標誌右邊那一欄 */
 /** @param borrowPool 借得到的衣服(訪客「我的衣櫃」= 示範衣櫃):自己的不夠一套時,今日推薦缺的先借(跟搭配頁同一個做法) */
-export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = null, onAdd = null, syncAlert = false, onUpdates = null, updatesUnseen = false, title = "我的衣櫃", note = null, feedback = null, borrowPool = null }) {
+export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = null, onAdd = null, syncAlert = false, onUpdates = null, updatesUnseen = false, title = "My closet", note = null, feedback = null, borrowPool = null }) {
   // 手機(<640)重排:少放幾件圓環卡才夠大可點,今日推薦從環心移到環下方長條,不再壓卡片
   const [phone, setPhone] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches);
   useEffect(() => {
@@ -185,7 +185,7 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
         const result = recommendOutfitWithBorrow(items, borrowPool, weather, readWearLog(), null, {}, null, readTaste());
         if (alive) setDaily(result.error ? { error: result.error, missing: result.missing } : { weather, ...result });
       } catch {
-        if (alive) setDaily({ error: "抓不到天氣" });
+        if (alive) setDaily({ error: "Couldn't get the weather" });
       }
     })();
     return () => { alive = false; };
@@ -397,7 +397,7 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
   };
 
   return (
-    <section className="landing" aria-label="衣櫃入口導覽">
+    <section className="landing" aria-label="Closet navigation">
       <header className="landing-top" ref={topRef}>
         {/* 左上(2026-10-23 本人「這一頁左上角也要一樣的改動」,跟衣櫃、搭配頁一樣):標誌,右邊一欄是標題、說明、回報鈕。
             桌機回報鈕排在「建立我的衣櫃」右邊(不另起一行,頂列高度跟改之前一樣);手機標誌和回報自己一行(見 styles.css) */}
@@ -410,17 +410,17 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
           </div>
         </div>
         <nav>
-          <button type="button" onClick={() => onEnter("closet")}>衣櫃</button>
-          <button type="button" onClick={() => onEnter("styling")}>搭配</button>
+          <button type="button" onClick={() => onEnter("closet")}>Closet</button>
+          <button type="button" onClick={() => onEnter("styling")}>Outfits</button>
           {onSync && (
-            <button type="button" onClick={onSync} className={syncAlert ? "has-alert" : undefined} aria-label={syncAlert ? "同步(有狀況,打開看)" : undefined}>
-              同步{syncAlert && <span className="sync-dot" aria-hidden="true" />}
+            <button type="button" onClick={onSync} className={syncAlert ? "has-alert" : undefined} aria-label={syncAlert ? "Sync (needs attention)" : undefined}>
+             Sync{syncAlert && <span className="sync-dot" aria-hidden="true" />}
             </button>
           )}
           {/* 更新公告(2026-10-08):有還沒看過的,旁邊亮一個小點 */}
           {onUpdates && (
-            <button type="button" onClick={onUpdates} aria-label={updatesUnseen ? "更新(有新的)" : undefined}>
-              更新{updatesUnseen && <span className="update-dot" aria-hidden="true" />}
+            <button type="button" onClick={onUpdates} aria-label={updatesUnseen ? "Updates (new)" : undefined}>
+             Updates{updatesUnseen && <span className="update-dot" aria-hidden="true" />}
             </button>
           )}
         </nav>
@@ -438,24 +438,24 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
               width: `${metrics.row ? Math.min(dims.w * 0.6, 360) : metrics.ringR * 1.12}px`,
             }}
           >
-            {!daily && <p className="landing-daily-loading">讀取今天的天氣…</p>}
+            {!daily && <p className="landing-daily-loading">Getting today's weather…</p>}
             {daily?.error && <p className="landing-daily-loading">{daily.error}</p>}
-            {daily?.missing && onAdd && <button type="button" className="landing-daily-go" onClick={onAdd}>去新增</button>}
+            {daily?.missing && onAdd && <button type="button" className="landing-daily-go" onClick={onAdd}>Add clothes</button>}
             {dailyOutfit && (
               <>
                 <p className="landing-daily-weather">
-                  <CitySelect /> {daily.weather.temp}° · 體感 {daily.weather.feelsLike}° · 降雨 {daily.weather.rainProb}%
+                  <CitySelect /> {daily.weather.temp}° · feels like {daily.weather.feelsLike}° · rain {daily.weather.rainProb}%
                 </p>
-                <h2>今日推薦</h2>
+                <h2>Today's pick</h2>
                 <ul className="landing-daily-list">
                   {Object.entries(dailyOutfit).map(([slot, item]) => (
                     <li key={slot}>
-                      <span>{SLOT_LABEL[slot]}</span>{item.borrowed && <small className="landing-daily-lent">示範</small>}{item.name}
+                      <span>{SLOT_LABEL[slot]}</span>{item.borrowed && <small className="landing-daily-lent">Demo</small>}{item.name}
                     </li>
                   ))}
                 </ul>
                 <button type="button" className="landing-daily-go" onClick={wearDaily}>
-                  <Sparkle size={14} weight="regular" aria-hidden="true" /> 穿上看看
+                  <Sparkle size={14} weight="regular" aria-hidden="true" /> Wear this outfit
                 </button>
               </>
             )}
@@ -469,7 +469,7 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
               type="button"
               className={`landing-card${focusIdx === index ? " is-focused" : ""}`}
               onClick={() => onCardClick(index, item)}
-              aria-label={focusIdx === index ? `開啟${item.name}的詳細資訊` : `聚焦${item.name}`}
+              aria-label={focusIdx === index ? `Open details for ${item.name}` : `Focus ${item.name}`}
               title={item.name}
               style={{
                 width: `${g.cardW}px`,
@@ -494,7 +494,7 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
         {/* 手機:環心空出來,放一行手勢提示(桌機的提示在底部) */}
         {phone && focusIdx === null && dims && !metrics?.row && (
           <p className="landing-ring-note" style={{ left: `${dims.w * 0.5}px`, top: `${metrics?.cy ?? dims.h * 0.34}px` }}>
-            滑一下轉一件<br />點一件放大
+           Swipe to turn<br />Tap one to enlarge
           </p>
         )}
       </div>
@@ -502,22 +502,22 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
       {/* 手機:今日推薦改成環下方長條,不再壓圓環卡片 */}
       {phone && focusIdx === null && (
         <div className="landing-daily-strip" ref={stripRef}>
-          {!daily && <p className="landing-daily-loading">讀取今天的天氣…</p>}
+          {!daily && <p className="landing-daily-loading">Getting today's weather…</p>}
           {daily?.error && <p className="landing-daily-loading">{daily.error}</p>}
-          {daily?.missing && onAdd && <button type="button" className="landing-daily-go" onClick={onAdd}>去新增</button>}
+          {daily?.missing && onAdd && <button type="button" className="landing-daily-go" onClick={onAdd}>Add clothes</button>}
           {dailyOutfit && (
             <>
               <p className="landing-daily-weather">
-                <CitySelect /> {daily.weather.temp}° · 體感 {daily.weather.feelsLike}° · 降雨 {daily.weather.rainProb}%
+                <CitySelect /> {daily.weather.temp}° · feels like {daily.weather.feelsLike}° · rain {daily.weather.rainProb}%
               </p>
-              <p className="landing-strip-head">今日推薦</p>
+              <p className="landing-strip-head">Today's pick</p>
               <ul className="landing-strip-pieces">
                 {["wholebody_up", "upperbody", "lowerbody", "shoes"].filter((slot) => dailyOutfit[slot]).slice(0, 4).map((slot) => (
-                  <li key={slot}><b>{SLOT_LABEL[slot]}</b>{dailyOutfit[slot].borrowed && <small className="landing-daily-lent">示範</small>}{dailyOutfit[slot].name}</li>
+                  <li key={slot}><b>{SLOT_LABEL[slot]}</b>{dailyOutfit[slot].borrowed && <small className="landing-daily-lent">Demo</small>}{dailyOutfit[slot].name}</li>
                 ))}
               </ul>
               <button type="button" className="landing-daily-go" onClick={wearDaily}>
-                <Sparkle size={14} weight="regular" aria-hidden="true" /> 穿上看看
+                <Sparkle size={14} weight="regular" aria-hidden="true" /> Wear this outfit
               </button>
             </>
           )}
@@ -525,17 +525,17 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
       )}
 
       {focusedItem && (
-        <aside className="landing-info" aria-label="聚焦單品資訊">
-          <button type="button" className="landing-info-close" onClick={() => setFocusIdx(null)} aria-label="退回圓環">
+        <aside className="landing-info" aria-label="Focused piece">
+          <button type="button" className="landing-info-close" onClick={() => setFocusIdx(null)} aria-label="Back to the ring">
             <X size={16} weight="regular" aria-hidden="true" />
           </button>
-          <p className="landing-info-part">{SLOT_LABEL[focusedItem.part] || "單品"}</p>
+          <p className="landing-info-part">{SLOT_LABEL[focusedItem.part] || "Piece"}</p>
           <h2>{focusedItem.name}</h2>
           {!!(focusedItem.tags || []).length && (
             <p className="landing-info-tags">{focusedItem.tags.slice(0, 4).join(" · ")}</p>
           )}
           <button type="button" className="landing-info-open" onClick={() => onOpen(focusedItem.id)}>
-            查看細節
+           See details
           </button>
         </aside>
       )}
@@ -544,8 +544,8 @@ export function LandingRing({ items, onOpen, onEnter, onWearOutfit, onSync = nul
       {!(phone && focusIdx === null) && (
         <p className="landing-hint">
           {focusIdx === null
-            ? (metrics?.row ? "點一件聚焦" : touch ? "上下滑轉一件 · 點一件聚焦" : "滾輪轉動 · 點一件聚焦")
-            : touch ? "上下滑看下一件 · 再點看細節 · 點空白返回" : "滾輪瀏覽下一件 · 再點一下看細節 · 點空白處返回"}
+            ? (metrics?.row ? "Tap a piece to focus" : touch ? "Swipe up or down to turn · Tap a piece to focus" : "Scroll to turn · Click a piece to focus")
+            : touch ? "Swipe for the next piece · Tap again for details · Tap empty space to go back" : "Scroll for the next piece · Click again for details · Click empty space to go back"}
         </p>
       )}
     </section>

@@ -99,7 +99,7 @@ async function open(keys, bytes) {
   try {
     return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: bytes.slice(0, 12) }, keys.cipher, bytes.slice(12)));
   } catch {
-    throw new Error("解不開雲端的資料,同步碼可能打錯了");
+    throw new Error("Couldn't decrypt the cloud data; the sync code may be wrong");
   }
 }
 const hex = (buffer) => [...new Uint8Array(buffer)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -253,7 +253,7 @@ const deliberate = new Set();
 export function noteDeliberateDelete(id) { deliberate.add(id); }
 class MassDelete extends Error {
   constructor(count) {
-    super(`這台少了 ${count} 件自己加的衣服,先不同步。`);
+    super(`This device is missing ${count} pieces you added, so sync is paused.`);
     this.count = count;
   }
 }
@@ -273,17 +273,17 @@ async function api(code, { method = "GET", img, body, type, parent } = {}) {
     });
   } catch (error) {
     // 斷線時瀏覽器只給「Failed to fetch」(Safari 是「Load failed」),面板上直接露出英文(審查 F60)
-    if (error?.name === "TimeoutError" || error?.name === "AbortError") throw new Error("網路太慢,同步逾時;等一下會自動再試");
+    if (error?.name === "TimeoutError" || error?.name === "AbortError") throw new Error("The connection is too slow and sync timed out; it'll retry shortly");
     throw new Error(typeof navigator !== "undefined" && navigator.onLine === false
-      ? "現在沒有網路;改動留在這台,有網路時會自動補上"
-      : "連不上同步服務;改動留在這台,等一下會自動再試");
+      ? "You're offline; changes stay on this device and sync when you're back online"
+      : "Can't reach the sync service; changes stay on this device and it'll retry shortly");
   }
 }
 
 async function readJson(response) {
   const data = await response.json().catch(() => ({}));
   if (response.status === 403 && data.reason === "unknown-space") throw new SyncGone(data.error);
-  if (!response.ok && response.status !== 409) throw new Error(data.error || `同步服務回 ${response.status}`);
+  if (!response.ok && response.status !== 409) throw new Error(data.error || `The sync service returned ${response.status}`);
   return data;
 }
 
@@ -329,7 +329,7 @@ export function syncNow(options = {}) {
       .catch((error) => {
         if (error instanceof SyncGone) {
           // 碼被換掉或雲端被刪了:這台停下來,不要每次切回來都白打一次
-          stopSync("這組同步碼已經失效(換了新碼,或雲端那份被刪了)。要繼續,到另一台按「看同步碼」,用新碼重新加入。");
+          stopSync("This sync code no longer works (it was changed, or the cloud copy was deleted). To continue, tap “Show sync code” on another device and rejoin with the new code.");
           return { pulled: 0, pushed: 0, keysChanged: false, error: syncNotice(), stopped: true };
         }
         if (error instanceof MassDelete) {
@@ -387,7 +387,7 @@ export async function joinSync(code) {
   const result = await syncNow();
   if (!result.error) return result;
   stopSync();
-  return { ...result, error: result.stopped ? "找不到這組同步碼,再對一次(或另一台已經換了新碼)" : result.error };
+  return { ...result, error: result.stopped ? "Couldn't find this sync code. Check it again (or another device already switched to a new code)" : result.error };
 }
 
 /**
@@ -396,7 +396,7 @@ export async function joinSync(code) {
  */
 export async function rotateCode() {
   const old = syncCode();
-  if (!old) throw new Error("這台還沒開始同步");
+  if (!old) throw new Error("This device hasn't started syncing");
   const first = await syncNow();                     // 先把舊空間的最新內容拿下來,換碼時才不會漏
   if (first.error) throw new Error(first.error);
   const next = newSyncCode();
@@ -411,7 +411,7 @@ export async function rotateCode() {
     storageSet(LAST_KEY, new Date().toISOString());
     return result;
   });
-  if (moved.error) throw new Error(`換碼沒成功,這台還在用舊碼:${moved.error}`);
+  if (moved.error) throw new Error(`Couldn't change the code; this device still uses the old one: ${moved.error}`);
   // 舊空間刪不掉(斷線)的話,其他台會繼續用舊碼同步、跟這台分家;記下來,下次同步成功時再刪一次
   try {
     await readJson(await api(old, { method: "DELETE" }));
@@ -512,7 +512,7 @@ async function runSync(options = {}) {
         sent += 1;
         const sealed = await seal(keys, new Uint8Array(await mine.blobs[entry.img].arrayBuffer()));
         const response = await api(code, { method: "PUT", img: entry.img, body: sealed, type: "application/octet-stream" });
-        if (response.status === 413) throw new Error(`「${entry.meta.name || "一件衣服"}」的圖太大,傳不上去;刪掉重新加一次`);
+        if (response.status === 413) throw new Error(`The image for “${entry.meta.name || "a piece"}” is too big to upload; delete it and add it again`);
         await readJson(response);
         cloudImages.add(entry.img);
         uploaded.add(entry.img);
@@ -534,14 +534,14 @@ async function runSync(options = {}) {
       report({ phase: "pull", done: got, total: items.pull.length });
       got += 1;
       const entry = items.result[id];
-      const current = await readLocalRecord(id).catch(() => { throw new Error("讀不到這台存的衣服,先不同步(免得把雲端當成全刪了)"); });
+      const current = await readLocalRecord(id).catch(() => { throw new Error("Couldn't read the clothes saved on this device, so sync is paused (so the cloud copy isn't treated as all deleted)"); });
       const now = current ? (await entryOf(keys, current, base.items[id]?.img ?? null)).entry : undefined;
       if (!same(now, mine.items[id])) { skipped.push(id); changedWhileRunning = true; continue; }
       if (!entry) { await deleteLocalItem(id, { fromSync: true }); pulled += 1; continue; }
       let blob = entry.img ? mine.blobs[entry.img] : null;
       if (entry.img && !blob) {
         const response = await api(code, { img: entry.img });
-        if (!response.ok) throw new Error(`下載「${entry.meta.name || id}」的圖失敗`);
+        if (!response.ok) throw new Error(`Couldn't download the image for “${entry.meta.name || id}”`);
         const plain = await open(keys, new Uint8Array(await response.arrayBuffer()));
         blob = new Blob([plain], { type: entry.type || "image/png" });
       }
@@ -586,7 +586,7 @@ async function runSync(options = {}) {
     storageSet(LAST_KEY, new Date().toISOString());
     return { pulled, pushed, keysChanged, keys: values.pull };
   }
-  throw new Error("另一台一直在同步,等一下再試");
+  throw new Error("Another device keeps syncing; try again in a moment");
 }
 
 // 給 node 小測試用(合併規則和大量刪除的判斷是純函式,不用開瀏覽器就能測);App 不用這幾個。

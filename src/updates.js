@@ -4,186 +4,188 @@
 // 2026-10-24 整份重編:一天一則,只寫用的人感覺得到的改變和要知道的限制。怎麼做的、文字改過幾次、誰說了什麼,
 // 寫在 git 和 vault 日誌,不寫這裡。影響資料或隱私的更正一定留著。短句、寫數字,不寫「全新體驗」這種話。
 
-export const UPDATES = [
+// [參賽版修改 2026-10-26] 英文參賽版只列 10-25 那兩則:更早的是中文正式站的歷史,講到這版沒有的東西
+// (打一句話、25 秒介紹、回報鈕、使用統計、pairthis.app 網址),跟隱私頁「不記統計」打架(驗收抓到)。原文留在 ALL_UPDATES
+const ALL_UPDATES = [
   // [參賽版新增 2026-10-25] 只在 YouCam 黑客松參賽版
   {
     date: "2026-10-25",
-    title: "試穿到你身上(參賽版)",
+    title: "Try it on you (contest version)",
     items: [
-      "上衣、外套的單品頁多了「穿在你身上」:放一張胸部以上、正面的照片,按「試穿這件」,大約 20–40 秒拿回試穿照,放在單品頁最上面。",
-      "照片只存在這台。按「試穿這件」時,照片和那件衣服的圖才會送到 YouCam(玩美移動)做試穿照;一台一天最多 15 次。",
-      "店裡比一下也能試:拍下店裡那件,分類點上衣或外套,比完下面就有「試穿這件」。",
-      "下身和鞋子還試不了:YouCam 要穿在人身上的參考照,衣櫃裡的是平放拍的。",
+      "Item pages for tops and outerwear now have “Try it on you”: add a chest-up, front-facing photo, tap “Try this on”, and the try-on photo appears at the top of the item page (ready in under 20 seconds in two test runs).",
+      "Your photo stays on this device. Only when you tap “Try this on” are the photo and the piece's image sent to YouCam (Perfect Corp.) to make the try-on; up to 40 a day from the same internet connection.",
+      "Compare in store can try on too: photograph the piece in the store, choose Top or Outerwear, and after the comparison there's “Try this on”.",
+      "Bottoms and shoes can't be tried on yet: YouCam needs a reference photo of them being worn, and the closet's photos are flat lays.",
     ],
   },
   {
     date: "2026-10-25",
-    title: "加第一件更順",
+    title: "Adding your first piece is smoother",
     items: [
-      "從商品頁挑的圖,直接按「整張去背」就好;圖裡有品牌標誌或別的東西再框。",
-      "加完第一件配的那套,重新整理後還穿在人台上,借來的示範衣服也在。",
-      "搭配頁的衣架停在有衣服的那一類;「這件」的選項改成已經有了、想買、夢幻逸品,「這件」自己一行。",
-      "自己的衣服還不夠一套時,入口的今日推薦、「再推薦一套」和說個場合重挑,缺的先跟示範衣櫃借,理由裡寫借了幾件。以前會變成「還差上衣 1 件就能配」。收藏的那套有借來的,穿回時也找得到。",
-      "去背後的「補滿」只在淺色衣服出現。",
+      "For an image picked from a product page, just tap “Remove whole background”; crop only if there's a logo or something else in it.",
+      "The outfit made after your first piece stays on the form after a reload, borrowed demo pieces included.",
+      "The Outfits rack opens on a category that has clothes; the “This piece” options are now I own it, Want it and Dream piece, with “This piece” on its own line.",
+      "When your own clothes aren't enough for an outfit, today's pick on the home screen and “Another outfit” borrow the missing pieces from the demo closet, and the reasons say how many were borrowed. It used to end at “Add a top to make an outfit”. Saved outfits with borrowed pieces can be worn again too.",
+      "“Fill in” after background removal only shows up for light-colored pieces.",
     ],
   },
   {
     date: "2026-10-24",
-    title: "示範直接進搭配,隱私說明更正",
+    title: "The demo goes straight to Outfits; privacy notes corrected",
     items: [
-      "按「看看穿搭示範」直接進搭配頁,人台穿著入口那套。人台上面有一句「試試:上課,不要外套」,點了就照這句重挑(只有示範衣櫃有)。",
-      "說「不要外套」時,理由照實講本來為什麼要加:是因為冷,還是因為會下雨。",
-      "入口往下捲是三步示範:兩段操作影片、一組打一句話前後的對照;最下面有一支 25 秒介紹(有聲音,點了才下載)。意見回饋在入口最下面。",
-      "換了新標誌。已經加到主畫面的,圖示要刪掉重加才會換。",
-      "補上兩個提醒:人台上是平放的照片,穿起來的垂墜感會不一樣;第一次去背要下載約 80MB 的模型。",
-      "更正:以前寫「照片不會離開你的手機」「開了同步,雲端也只存加密過的一份」。同步只有站主自己的裝置在用,訪客開不了,這兩句都說得比實際多,拿掉了。",
-      "更正:貼 GU、UNIQLO 的連結時,商品圖是你的瀏覽器直接向品牌下載的,品牌看得到你的網路位址。以前寫成品牌只看得到這個網站的伺服器。",
-      "隱私說明重新分段,比較好找;使用統計補上漏寫的一種推薦(加完第一件配的那套)。",
+      "“See a demo outfit” now goes straight to the Outfits page, with the form wearing the home screen's outfit. Above the form is one line, “Try: for class, no jacket”; tap it and it re-picks with that line (demo closet only).",
+      "When you say “no jacket”, the reasons now say honestly why a jacket would have been added: because it's cold, or because of rain.",
+      "Scrolling down the home screen shows a three-step demo: two screen recordings and a before-and-after for one typed line; at the bottom is a 25-second intro (with sound, downloaded only when you tap it). Feedback is at the very bottom of the home screen.",
+      "New logo. If you already added it to your Home Screen, delete the icon and add it again to see the new one.",
+      "Two reminders added: the form shows flat-lay photos, so the drape will look different when worn; the first background removal downloads an 80 MB model.",
+      "Correction: it used to say “photos never leave your phone” and “with sync on, the cloud only keeps an encrypted copy”. Sync is used only by the site owner's own devices and visitors can't turn it on, so both sentences claimed more than was true. They're gone.",
+      "Correction: when you paste a GU or UNIQLO link, your browser downloads the product images straight from the brand, so the brand can see your IP address. It used to say the brand only saw this site's server.",
+      "The privacy notes are split into clearer sections; the usage stats list now includes a recommendation type that was missing (the outfit made after your first piece).",
     ],
   },
   {
     date: "2026-10-23",
-    title: "網址換成 pairthis.app",
+    title: "The address is now pairthis.app",
     items: [
-      "新網址 pairthis.app,站名改叫 PairThis(搭這件)。舊網址 wardrobe-gallery.vercel.app 還開著,存在那裡的衣櫃不會自己搬過來,要用備份檔搬。",
-      "衣櫃還空著時,貼商品連結預設「已經有了」,存了就直接配出第一套。",
-      "入口的示範人台底下會寫它配這套的理由。",
+      "New address pairthis.app, and the site is now called PairThis (搭這件 in Chinese). The old address wardrobe-gallery.vercel.app still works, but closets saved there don't move over by themselves; use a backup file to move them.",
+      "While your closet is empty, pasting a product link defaults to “I own it”, and saving it makes your first outfit right away.",
+      "The demo form on the home screen now shows the reasons for its outfit.",
     ],
   },
   {
     date: "2026-10-22",
-    title: "可以重拍、人台上看這件、搜「全黑」",
+    title: "Retake a photo, see a piece from the form, search “all black”",
     items: [
-      "自己拍的照片去背後,可以按「重拍一張」;已經填的名稱、分類都留著。",
-      "搭配頁人台上點一件,多一顆「看這件的詳細」。",
-      "搜尋「全黑」「黑色」「黑的」都當「黑」比。顏色只比品名裡的字,品名沒寫顏色的搜不到。",
+      "After the background is removed from your own photo, you can tap “Retake”; the name and category you filled in stay.",
+      "Tap a piece on the Outfits form and there's a new “See this piece's details” button.",
+      "Searching “全黑”, “黑色” or “黑的” all count as “black” (the Chinese search words). Color only matches words in the name, so pieces without a color in the name won't show up.",
     ],
   },
   {
     date: "2026-10-21",
-    title: "第一件更好加",
+    title: "Your first piece is easier to add",
     items: [
-      "新增時分類可以不選,會照品名和形狀猜一個,衣櫃格子上標「分類是猜的」;猜錯點開那件改。",
-      "加完第一件,直接拿它配示範衣櫃的衣服給你一套。",
-      "多了「哪裡卡住了?告訴我」,寫一句話就能送出。",
-      "修好 iPad、iPhone 的 Safari 無痕分頁存不進衣服。無痕分頁一關,裡面加的衣服會跟著消失。",
-      "使用統計多記幾種動作,都不含衣服的內容;隱私說明有列。",
+      "You can skip the category when adding; it guesses from the name and shape, and the closet tile says “Category guessed”. If it's wrong, open the piece and change it.",
+      "After your first piece, it immediately pairs it with demo closet clothes to give you an outfit.",
+      "New “Stuck somewhere? Tell me”: write one sentence and send it.",
+      "Fixed Safari private tabs on iPad and iPhone not saving clothes. Clothes added in a private tab disappear when the tab closes.",
+      "Usage stats record a few more actions, never the content of your clothes; the privacy notes list them.",
     ],
   },
   {
     date: "2026-10-20",
-    title: "電腦上往下挑衣服,人台不會被切掉",
+    title: "On a computer, scrolling through clothes no longer cuts off the form",
     items: [
-      "電腦上搭配頁往下捲,人台跟著畫面走;天氣和理由搬到右邊衣架上面。",
-      "調整衣服時用滾輪縮放,頁面不會跟著捲。",
-      "名字裡有「休閒」的算偏休閒。",
+      "On a computer, the form on the Outfits page follows you as you scroll; weather and reasons moved above the rack on the right.",
+      "Zooming a piece with the scroll wheel no longer scrolls the page.",
+      "Names with “casual” (休閒) count as leaning casual.",
     ],
   },
   {
     date: "2026-10-19",
-    title: "人台重畫,比例對了",
+    title: "The form is redrawn with the right proportions",
     items: [
-      "人台照真人比例重畫。衣服照照片量出來的尺寸擺:上衣掛在肩上、褲子穿在腰上、鞋踩在地上。",
-      "自己拉過位置的那幾件不會跟著動,點那件按「重設這件」才用新位置。",
-      "長褲停在鞋面上方,包連背帶不會甩出人台;人台上的 ✕ 會避開別件。",
-      "推薦理由只講穿搭的話,每件怎麼判斷的收在「怎麼判斷的」。",
+      "The form is redrawn to real body proportions. Clothes are placed by sizes measured from their photos: tops hang from the shoulders, pants sit at the waist, shoes stand on the floor.",
+      "Pieces you moved yourself stay put; tap the piece and “Reset this piece” to use the new position.",
+      "Long pants stop above the shoes, bags with straps stay inside the form, and the ✕ on the form avoids other pieces.",
+      "Recommendation reasons talk only about the outfit; how each piece was judged is tucked into “How it decided”.",
     ],
   },
   {
     date: "2026-10-18",
-    title: "說「上課,不要外套」會照做了",
+    title: "“For class, no jacket” now works",
     items: [
-      "場合和不要的東西可以一起講:「上課,不要外套」會照上課挑一整套、不放外套。",
-      "最上面「聽你說的」列出照哪幾個條件挑的,沒聽懂的那段會原句列出來。",
+      "You can name an occasion and what you don't want together: “for class, no jacket” picks a whole outfit for class without a jacket.",
+      "“Heard” at the top lists which conditions the outfit followed, and any part it didn't understand is quoted back.",
     ],
   },
   {
     date: "2026-10-10",
-    title: "在店裡比一下",
+    title: "Compare in store",
     items: [
-      "衣櫃上面多一顆「店裡比一下」:拍一張正在看的衣服,看家裡有幾件顏色相近的、買了能配哪幾套。不存也可以。",
-      "第一次要下載約 80MB 的去背模型,建議先在家用 Wi-Fi 打開一次。",
+      "A new “Compare in store” button above the closet: photograph the piece you're looking at and see how many similar-colored ones you own and which outfits it would make. No need to save it.",
+      "The first time, it downloads an 80 MB background-removal model; open it once on Wi-Fi at home first.",
     ],
   },
   {
     date: "2026-10-09",
-    title: "使用統計、夢幻逸品、隱私說明",
+    title: "Usage stats, Dream pieces, privacy notes",
     items: [
-      "開始有不記名的使用統計(Umami,不放 cookie),不記衣服的名稱、照片和你打的字。不想被記:網址後面加 ?notrack 打開一次。細節在「隱私與使用說明」。",
-      "「夢想」改名「夢幻逸品」,想買的可以一次挑好幾件搬過去。",
-      "人台上每件右上有 ✕,點了就脫掉;點一件可以往前、往後一層。",
+      "Anonymous usage stats started (Umami, no cookies), never recording clothes' names, photos or anything you type. To opt out, open the site once with ?notrack at the end of the address. Details are in “Privacy and how it works”.",
+      "“Dreams” is renamed “Dream pieces”, and you can move several wishlist pieces there at once.",
+      "Each piece on the form has an ✕ at the top right to take it off; tap a piece to bring it forward or send it backward.",
     ],
   },
   {
     date: "2026-10-08",
-    title: "淺色、搜尋、備註",
+    title: "Light theme, search, notes",
     items: [
-      "底色換成淺木色。",
-      "衣櫃有搜尋了,空格隔開可以疊條件,例如「黑 短褲」。",
-      "單品頁多一個備註欄,只有你看得到。",
-      "搭配頁的襯衫可以疊在 T 恤外面。",
-      "多了這個更新公告。",
+      "The background is now a light wood tone.",
+      "The closet has search; separate words with spaces to combine them, like “black shorts”.",
+      "Item pages have a note field that only you can see.",
+      "On the Outfits page, a shirt can be layered over a T-shirt.",
+      "This updates list is new.",
     ],
   },
   {
     date: "2026-10-07",
-    title: "品牌分類與總價",
+    title: "Brands and totals",
     items: [
-      "衣櫃目錄多一行品牌,單品頁可以改。",
-      "目錄底下有總價,只加有標價的;不同幣別分開加,不換算。",
-      "白衣服去背比較不會缺一塊,還是缺的話按「補滿」。",
+      "The closet index has a row of brands, and you can edit the brand on the item page.",
+      "Below the index is a total price, counting only priced pieces; different currencies are added separately, not converted.",
+      "White clothes lose fewer bits in background removal; if a bit is still missing, tap “Fill in”.",
     ],
   },
   {
     date: "2026-10-06",
-    title: "垃圾桶、配件也會配",
+    title: "Trash, and accessories in outfits",
     items: [
-      "刪掉的先放垃圾桶,30 天後才自動刪掉。",
-      "今日推薦會配手錶、眼鏡這些配件,也會參考你之前選過哪幾套。",
-      "同一款有兩件,併成一格標數量。單品頁可以換圖。",
-      "修好 iPhone 上圖片有時候跑不出來。",
+      "Deleted pieces go to the trash first and are deleted for good after 30 days.",
+      "Today's pick now adds accessories like watches and glasses, and takes the outfits you chose before into account.",
+      "Two of the same piece merge into one tile with a quantity. You can change a piece's image on its item page.",
+      "Fixed images sometimes not showing on iPhone.",
     ],
   },
   {
     date: "2026-10-05",
-    title: "標價、第一次來的畫面",
+    title: "Prices and a first-visit screen",
     items: [
-      "衣服可以標價。",
-      "第一次來先看到一套示範穿搭,天氣可以選城市。",
-      "用 LINE、IG 裡面的瀏覽器打開會先提醒;每多 3 件提醒一次備份。",
+      "Clothes can have a price.",
+      "First visits open on a demo outfit, and you can choose the city for the weather.",
+      "Opening it in the LINE or Instagram in-app browser shows a warning first; every 3 new pieces it reminds you to back up.",
     ],
   },
   {
     date: "2026-10-04",
-    title: "其他品牌也能貼連結",
+    title: "Links from other brands work too",
     items: [
-      "GU、UNIQLO 以外的品牌也能貼連結挑圖。蝦皮、Zara 這類讀不到,要用截圖。",
-      "備份改成一個 ZIP 檔,裡面有去背好的圖。",
+      "Brands other than GU and UNIQLO can be pasted as links to pick images. Sites like Shopee and Zara can't be read, so use a screenshot.",
+      "Backups are now one ZIP file that includes the cutout images.",
     ],
   },
   {
     date: "2026-10-03",
-    title: "手機連結、推薦理由",
+    title: "Phone links, recommendation reasons",
     items: [
-      "手機上的 GU、UNIQLO 連結,和 GU App 分享的整段文字,都貼得進去。",
-      "說「面試」不會配短褲。",
+      "GU and UNIQLO links on phones, and the whole text the GU app shares, can be pasted in.",
+      "Saying “interview” no longer gets you shorts.",
     ],
   },
   {
     date: "2026-10-02",
-    title: "你自己的衣櫃",
+    title: "Your own closet",
     items: [
-      "每個人都能加自己的衣服,存在自己的瀏覽器裡,別人看不到。",
-      "你的衣櫃和示範衣櫃分開,推薦只在同一個衣櫃裡配。",
-      "存檔前提醒重複:同一個連結貼第二次,或櫃裡已經有同款同色的。",
+      "Anyone can add their own clothes, saved in their own browser where nobody else can see them.",
+      "Your closet and the demo closet are separate, and recommendations only pair within one closet.",
+      "Before saving, it warns about duplicates: the same link pasted twice, or a piece of the same style and color already in the closet.",
     ],
   },
   {
     date: "2026-10-01",
-    title: "想買的衣服",
+    title: "Wishlist clothes",
     items: [
-      "還沒買的也能放進衣櫃,貼 GU、UNIQLO 的商品連結挑圖。",
-      "想買的那件會列出櫃裡很像的,再用你已經有的衣服配三套給你看。",
+      "Clothes you haven't bought can go in the closet too, by pasting a GU or UNIQLO product link and picking an image.",
+      "A wishlist piece lists similar pieces you own, then makes three outfits with clothes you already have.",
     ],
   },
 ];
@@ -206,6 +208,8 @@ export function hasUnseenUpdates() {
 export function markUpdatesSeen() {
   try { localStorage.setItem(SEEN_KEY, latestMark()); } catch { /* 存不了就算了,下次再亮一次 */ }
 }
+
+export const UPDATES = ALL_UPDATES.filter((entry) => entry.date >= "2026-10-25");
 
 /** 2026-10-08 → 10.08 */
 export const shortDate = (date) => date.slice(5).replace("-", ".");

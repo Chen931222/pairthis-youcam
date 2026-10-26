@@ -16,14 +16,14 @@ import { track } from "./analytics.js";
 const FALLBACK_WEATHER = { temp: null, feelsLike: 25, desc: "", rainProb: 0, tMax: 27, tMin: 22 };
 // 理由裡引號框住的單品名整段換行,不從中間斷(「深藍連帽防風／外套」,2026-10-24 手機截圖)。
 // 用 inline-block 不用 nowrap:一行放不下整個品名時才在品名裡面斷,不會撐出窄欄被切掉(320 寬的「駝色斜紋厚棉襯衫式外套」,驗收)
-const keepQuotes = (text) => text.split(/(「[^」]+」)/).map((part, i) => (i % 2 ? <span key={i} className="keep-together">{part}</span> : part));
+const keepQuotes = (text) => text.split(/(“[^”]+”)/).map((part, i) => (i % 2 ? <span key={i} className="keep-together">{part}</span> : part));
 
 /** 一套穿搭穿在人台上,只看不能動。比例跟搭配頁同一把尺(src/dollLayout.js):圖載入時量身形,量好才顯示。 */
 function MiniLook({ outfit }) {
   const [nats, setNats] = useState({});
   const [, setTick] = useState(0);
   return (
-    <div className="mini-look" role="img" aria-label={`示範穿搭：${Object.values(outfit).filter(Boolean).map((item) => item.name).join("、")}`}>
+    <div className="mini-look" role="img" aria-label={`Demo outfit: ${Object.values(outfit).filter(Boolean).map((item) => item.name).join(", ")}`}>
       <Silhouette />
       {Object.entries(outfit).map(([slot, item]) => {
         if (!item || !SLOT_STYLE[slot] || slot === "socks") return null;
@@ -67,29 +67,37 @@ function MiniLook({ outfit }) {
 // title 拆成幾段,只在段和段之間換行(手機窄欄會斷成「貼／商品連結」「打／一句話」,2026-10-23 截圖)
 // 2026-10-24 本人「下面不知道怎麼區分」:三章各一種版式,不是同一個模子換左右。編號 01–03 是有理由的:三章是有順序的三步
 const STEPS = [
-  { key: "add", no: "01", title: ["網購過的，", "貼商品連結就好"], body: "挑一張商品圖就好。讀不到圖的網站用截圖；沒有連結的，拍一張平放的。" },
-  { key: "weather", no: "02", title: ["照你那邊的天氣", "配一套，說為什麼"], body: "天氣照你選的城市。衣服還不夠一套時，缺的先跟示範衣櫃借。" },
-  { key: "talk", no: "03", title: ["不喜歡，", "打一句話就換"], body: "說個場合，整套照著重挑；只說不要哪一件，就只動那一件。" },
+  { key: "add", no: "01", title: ["Bought it online?", "Just paste the link"], body: "Pick one product photo. If a site won't load its images, use a screenshot. No link? Take a photo of it laid flat." },
+  { key: "weather", no: "02", title: ["One outfit for your weather,", "with the reasons"], body: "The weather is for the city you choose. Not enough clothes for a full outfit yet? It borrows the missing pieces from the demo closet." },
+  // [參賽版修改 2026-10-26] 原本的 03「不喜歡,打一句話就換」講的輸入框只懂中文,英文版藏起來了(OutfitStudio 的 ASK_BOX),
+  // 第三章改講試穿。秒數照實測:2026-10-25 本機 18 秒內、2026-10-26 線上 13.4 秒,各一次
+  { key: "tryon", no: "03", title: ["See it on you", "before you buy"], body: "Open a top or a jacket, add a chest-up photo of yourself and tap “Try this on”. YouCam's AI puts the piece on you; in two test runs it was ready in under 20 seconds. It works for a piece you're looking at in a store, too." },
 ];
+// [參賽版修改 2026-10-26] 01、02 章的短片和最下面的 25 秒介紹是中文介面錄的:英文版換成英文介面的手機截圖(/media/still-*.jpg),介紹片先不放
+const CONTEST_STILLS = true;
 // 第二章旁邊的理由:影片裡那一格寫的(films/pairthis-intro/rec/marks.json 的 add_reason,錄影 2026-10-23),字照原文、標點換全形。
 // 原本六條全列,2026-10-24 收成三條:溫度、下雨、顏色各一,看得出它在講為什麼就夠
+// [參賽版修改 2026-10-26] 影片換成截圖(/media/still-weather.jpg,本機台中 30°、體感 34° 那天配的),理由也換成截圖裡那兩條,字照畫面
 const RECORDED_REASONS = [
-  "體感 23°，薄長袖或短袖都行",
-  "降雨 100%，記得帶傘",
-  "只有「深藍連帽防風外套」有顏色，其他低調色襯著它",
+  "Feels like 34°, go for breathable pieces",
+  "All muted, easy colors, so nothing clashes",
 ];
 // 第三章前後對照:示範衣櫃實際配出來的兩套(work/preview-2026-10-23-brand/scripts/capture-talk.mjs,2026-10-24)。
 // 推薦有隨機,腳本重試到「今日推薦有外套」那次才存;人台上的 ✕ 和選取框截圖時藏起來;衣服和位置是 app 真的配出來的。
 // 照「上課」整套重挑,不只拿掉外套:上衣和下身也換了,註記照實寫。兩邊的理由句 2026-10-24 拿掉(收短),只留標籤
 const TALK = {
-  before: { src: "/media/talk-before.jpg", label: "今日推薦" },
-  after: { src: "/media/talk-after.jpg", label: "照這句挑之後" },
-  note: "示範衣櫃實際配出來的兩套。照「上課」整套重挑，外套拿掉，上衣和下身也換了。",
+  before: { src: "/media/talk-before.jpg", label: "Today's pick" },
+  after: { src: "/media/talk-after.jpg", label: "After that line" },
+  note: "Two outfits the demo closet actually produced. Asked for “class”, it re-picked the whole outfit: the jacket came off, and the top and bottoms changed too.",
 };
 
 /** 一段循環短片:捲到看得見才播、捲走就停,省電也省流量(preload none,封面先頂著)。減少動態的人不自動播,給播放鈕。
  *  一直動超過 5 秒要能停(WCAG 2.2.2,驗收抓到):點一下影片(或 Tab 到按 Enter)暫停,再點繼續;自己停的不會因為捲回來又自己播 */
 function StoryLoop({ name, label }) {
+  if (CONTEST_STILLS) return <img className="story-video" src={`/media/still-${name}.jpg`} alt={label} loading="lazy" />;
+  return <StoryVideo name={name} label={label} />;
+}
+function StoryVideo({ name, label }) {
   const ref = useRef(null);
   const [still] = useState(() => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   const [held, setHeld] = useState(false);
@@ -126,9 +134,9 @@ function StoryLoop({ name, label }) {
     if (held) { setHeld(false); v.play().catch(() => {}); } else { setHeld(true); v.pause(); }
   };
   return (
-    <button type="button" className="story-toggle" onClick={toggle} aria-pressed={held} aria-label={`${label}（${held ? "已暫停，按一下繼續播" : "按一下暫停"}）`}>
+    <button type="button" className="story-toggle" onClick={toggle} aria-pressed={held} aria-label={`${label} (${held ? "paused, click to play" : "click to pause"})`}>
       {video}
-      {held && <span className="story-paused" aria-hidden="true">已暫停</span>}
+      {held && <span className="story-paused" aria-hidden="true">Paused</span>}
     </button>
   );
 }
@@ -155,7 +163,7 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
     if (!weather || !demoItems.length) return null;
     const result = recommendOutfit(demoItems, weather, {});
     // 引擎的句子是半形標點(全站還沒改),入口這頁都是全形,這裡換掉免得一頁兩種
-    const fullWidth = (text) => text.replace(/,/g, "，").replace(/;/g, "；").replace(/:/g, "：");
+    const fullWidth = (text) => text.replace(/,/g, ",").replace(/;/g, ";").replace(/:/g, ":");
     // raw:引擎原本的句子(半形),帶進搭配頁用,那頁全是半形
     return result.error ? null : { outfit: result.outfit, reasons: (result.reasons || []).slice(0, 3).map(fullWidth), raw: result.reasons || [], details: result.details || [] };
   }, [weather, idsKey]);   // eslint-disable-line react-hooks/exhaustive-deps
@@ -204,7 +212,7 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
     <figure className="welcome-look">
       <MiniLook outfit={look.outfit} />
       <figcaption>
-        <span className="welcome-look-when">{realWeather ? <><CitySelect /> {weather.temp}°，</> : ""}<span className="nowrap">{realWeather ? "示範衣櫃今天這樣穿" : "示範衣櫃的一套"}{realWeather && look.reasons.length ? "：" : ""}</span></span>
+        <span className="welcome-look-when">{realWeather ? <><CitySelect /> {weather.temp}°. </> : ""}<span>{realWeather ? "The demo closet today" : "An outfit from the demo closet"}{realWeather && look.reasons.length ? ":" : ""}</span></span>
         {realWeather && look.reasons.length > 0 && (
           <ul className="welcome-look-why">{look.reasons.map((reason) => <li key={reason}>{keepQuotes(reason)}</li>)}</ul>
         )}
@@ -220,8 +228,8 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
   const narrow = useMedia("(max-width: 760px)");
   const demoFirst = narrow && !app;
   const copyLink = async () => {
-    try { await navigator.clipboard.writeText(here); setCopied("已複製，到 Safari 或 Chrome 貼上"); }
-    catch { setCopied(`複製不了，手動輸入：${here.replace(/^https?:\/\//, "")}`); }
+    try { await navigator.clipboard.writeText(here); setCopied("Copied. Paste it into Safari or Chrome."); }
+    catch { setCopied(`Couldn't copy. Type it in: ${here.replace(/^https?:\/\//, "")}`); }
   };
 
   return (
@@ -235,7 +243,7 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
       <Logo className="welcome-logo" />
       {/* 入口的字(2026-10-22 本人「寫的太 AI」):不做條列、不做「兩個字加粗當標題」,就幾段講話,長短不齊。每句都是實測過的事,限制照講 */}
       <h2 id="welcome-title" className="welcome-lede">
-        <span>用你已有的衣服，</span><span>照今天的天氣搭一套，</span><span>告訴你為什麼。</span>
+        <span>From the clothes you own, </span><span>an outfit for today's weather, </span><span>and why it works.</span>
       </h2>
 
       {demoFirst && demo}
@@ -247,29 +255,29 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
       <div className="welcome-start">
         {app && (
           <p className="welcome-tip is-warning" role="note">
-            你現在是在 {app} 裡面開的。在這裡加的衣服只存在 {app} 裡，之後用 Safari 或 Chrome 打開會是空的。
-            先從 {app} 的選單選「用瀏覽器開啟」，再開始加。
+            You opened this inside {app}. Clothes you add here stay in {app} only; Safari or Chrome will show an empty closet.
+            Use the {app} menu to “Open in browser” first, then start adding.
             <span className="welcome-tip-actions">
               {/* LINE 認這個參數:帶著它的連結會改用手機的預設瀏覽器開 */}
-              {app === "LINE" && <a href={`${here}/?openExternalBrowser=1`}>用瀏覽器開啟</a>}
-              <button type="button" onClick={copyLink}>複製網址</button>
+              {app === "LINE" && <a href={`${here}/?openExternalBrowser=1`}>Open in browser</a>}
+              <button type="button" onClick={copyLink}>Copy link</button>
             </span>
             {copied && <span className="welcome-tip-status" role="status">{copied}</span>}
           </p>
         )}
         <div className="welcome-actions">
-          <button type="button" className="primary-button" onClick={onAdd}>加入第一件衣服</button>
+          <button type="button" className="primary-button" onClick={onAdd}>Add your first piece</button>
           {/* 2026-10-24(試用者:「打一句話就能改」藏太深):直接帶這頁那套進搭配,不再先停在衣服環繞的入口 */}
-          {!!demoItems.length && <button type="button" className="secondary-button" onClick={() => (look ? onDemo(demoPayload()) : setDemoWanted(true))} disabled={demoWanted} aria-busy={demoWanted}>看看穿搭示範</button>}
+          {!!demoItems.length && <button type="button" className="secondary-button" onClick={() => (look ? onDemo(demoPayload()) : setDemoWanted(true))} disabled={demoWanted} aria-busy={demoWanted}>See a demo outfit</button>}
         </div>
         {ios && !standalone && !app && (
           // 2026-10-24 縮成兩行(事實不變):手機上它排在示範和按鈕後面,三行時第三行掉出 iPhone 第一屏。
           // 排在「不用註冊」前面:這句要在加衣服之前做,375×548 放後面會被推出第一屏 39px(驗收)
           <p className="welcome-tip">
-            iPhone 建議先從分享鈕「加入主畫面」，再從主畫面打開來加。只放在 Safari 久沒開，資料可能被系統清掉。
+           On iPhone, first tap Share → “Add to Home Screen”, then add clothes from the Home Screen icon. If it only lives in Safari and goes unopened for a while, the system may clear its data.
           </p>
         )}
-        <p className="welcome-free">不用註冊，衣櫃存在這個瀏覽器裡。</p>
+        <p className="welcome-free">No sign-up. Your closet is saved in this browser.</p>
       </div>
 
       {!demoFirst && demo}
@@ -281,11 +289,11 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
         {/* 用過的人的入口:備份、垃圾桶。排在「怎麼用」那段上面(2026-10-24 驗收):刪光衣服要找垃圾桶的人從這裡進去,
             放到最底要先捲過三列影片 */}
         <p className="welcome-note">
-          有備份檔？<button type="button" onClick={() => fileRef.current?.click()}>匯入備份</button>
+         Have a backup file? <button type="button" onClick={() => fileRef.current?.click()}>Import backup</button>
           {trashCount > 0 && onOpenTrash && (
             <>
               <span aria-hidden="true"> · </span>
-              垃圾桶裡有 {trashCount} 件<button type="button" onClick={onOpenTrash}>打開</button>
+              {trashCount} {trashCount === 1 ? "piece" : "pieces"} in the trash <button type="button" onClick={onOpenTrash}>Open</button>
             </>
           )}
           <input
@@ -302,7 +310,7 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
         </p>
       </div>
 
-      <section ref={storyRef} className={reveal ? "welcome-story can-reveal" : "welcome-story"} aria-label="怎麼用">
+      <section ref={storyRef} className={reveal ? "welcome-story can-reveal" : "welcome-story"} aria-label="How it works">
         {/* 2026-10-24 本人「像 Apple 一樣有分層」:每段一整幅橫跨整頁的章節,底色紙／米紙交替、標題放大、影片放大左右交替;
             最後一章墨色底放 25 秒介紹。借的是章節的節奏,不做視差、不發光 */}
         {/* 2026-10-24 第二版:寬螢幕 960→1200;三章三種版式——01 字左影片右;02 影片左、字右,旁邊把影片裡的理由排成字;
@@ -312,29 +320,29 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
             <div className="story-inner">
               <span className="story-no" aria-hidden="true">{step.no}</span>
               <div className="story-text">
-                <h3>{step.title.map((part) => <span key={part} className="nowrap">{part}</span>)}</h3>
+                <h3>{step.title.join(" ")}</h3>
                 <p>{step.body}</p>
               </div>
               {step.key !== "talk" && (
                 <div className="story-media">
-                  <StoryLoop name={step.key} label={`示範畫面：${step.title.join("")}`} />
+                  <StoryLoop name={step.key} label={`Demo: ${step.title.join(" ")}`} />
                 </div>
               )}
               {step.key === "weather" && (
                 <figure className="story-notes">
-                  <figcaption>影片裡它寫的理由（節錄）：</figcaption>
+                  <figcaption>{CONTEST_STILLS ? "Reasons it gave in this screenshot:" : "Reasons it wrote in the video (excerpt):"}</figcaption>
                   <ul>{RECORDED_REASONS.map((reason) => <li key={reason}>{keepQuotes(reason)}</li>)}</ul>
                 </figure>
               )}
               {step.key === "talk" && (
                 <figure className="story-pair">
                   <div className="story-pair-side story-pair-before">
-                    <img src={TALK.before.src} alt={`${TALK.before.label}：有深藍連帽防風外套的一套`} loading="lazy" />
+                    <img src={TALK.before.src} alt={`${TALK.before.label}: an outfit with the navy hooded windbreaker`} loading="lazy" />
                     <p><b>{TALK.before.label}</b></p>
                   </div>
-                  <p className="story-pair-cmd"><span className="nowrap">「上課，</span><span className="nowrap">不要外套」</span></p>
+                  <p className="story-pair-cmd"><span className="nowrap">“For class,</span><span className="nowrap"> no jacket”</span></p>
                   <div className="story-pair-side story-pair-after">
-                    <img src={TALK.after.src} alt={`${TALK.after.label}：拿掉外套、換成上課穿的一套`} loading="lazy" />
+                    <img src={TALK.after.src} alt={`${TALK.after.label}: jacket off, re-picked for class`} loading="lazy" />
                     <p><b>{TALK.after.label}</b></p>
                   </div>
                   <figcaption>{TALK.note}</figcaption>
@@ -343,35 +351,35 @@ export function Welcome({ demoItems, onAdd, onDemo, onImportFile, trashCount = 0
             </div>
           </article>
         ))}
-        <div className="story-intro">
+        {!CONTEST_STILLS && <div className="story-intro">
           <div className="story-inner">
             <div className="story-text">
-              <h3><span className="nowrap">25 秒，</span><span className="nowrap">從放進來到配好</span></h3>
+              <h3>25 seconds, from adding a piece to a full outfit</h3>
               {/* 載入大小、怎麼錄的不寫(2026-10-24 取捨):要知道的只有「會出聲」 */}
               {!intro && (
-                <button type="button" className="story-intro-open" onClick={() => { setIntro(true); track("看介紹影片", { 頁: "入口" }); }}>看 25 秒介紹（有聲音）</button>
+                <button type="button" className="story-intro-open" onClick={() => { setIntro(true); track("看介紹影片", { 頁: "入口" }); }}>Watch the 25-second intro (with sound)</button>
               )}
             </div>
             <div className="story-media story-media-intro">
               {intro ? (
-                <video ref={introRef} className="story-intro-video" src="/media/intro.mp4" poster="/media/intro.jpg" controls autoPlay playsInline aria-label="PairThis 搭這件 25 秒介紹" />
+                <video ref={introRef} className="story-intro-video" src="/media/intro.mp4" poster="/media/intro.jpg" controls autoPlay playsInline aria-label="PairThis 25-second intro" />
               ) : (
                 <img src="/media/intro.jpg" alt="" loading="lazy" />
               )}
             </div>
           </div>
-        </div>
+        </div>}
       </section>
 
       {/* 頁尾:更新、說明、回饋各一個連結,不加前綴問句 */}
       <footer className="welcome-foot">
         {onUpdates && (
           <>
-            <button type="button" onClick={onUpdates}>更新紀錄</button>
+            <button type="button" onClick={onUpdates}>Updates</button>
             <span aria-hidden="true"> · </span>
           </>
         )}
-        <a href="/privacy.html">隱私與使用說明</a>
+        <a href="/privacy.html">Privacy and how it works</a>
         <span aria-hidden="true"> · </span>
         <Feedback where="歡迎" label="意見回饋" />
       </footer>

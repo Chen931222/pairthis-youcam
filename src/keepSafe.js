@@ -15,7 +15,7 @@ export function inAppBrowser(ua = typeof navigator === "undefined" ? "" : naviga
   if (/Barcelona/.test(ua)) return "Threads";
   if (/Messenger|MessengerForiOS|FB_IAB\/MESSENGER|Orca-Android/i.test(ua)) return "Messenger";
   if (/FBAN|FBAV|FB_IAB/i.test(ua)) return "Facebook";
-  if (/MicroMessenger/i.test(ua)) return "微信";
+  if (/MicroMessenger/i.test(ua)) return "WeChat";
   return null;
 }
 

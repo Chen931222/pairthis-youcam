@@ -85,11 +85,11 @@ export async function fetchProductPage(url, signal) {
   try {
     const response = await fetch(`/api/product-page?${new URLSearchParams({ url })}`, { signal: signal || AbortSignal.timeout(15000) });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) return { error: data.error || `讀取失敗(${response.status})`, images: [] };
+    if (!response.ok) return { error: data.error || `Couldn't read it (${response.status})`, images: [] };
     return { ...data, images: Array.isArray(data.images) ? data.images : [] };
   } catch (error) {
     if (error?.name === "AbortError") throw error;
-    return { error: navigator.onLine === false ? "現在沒有網路" : "讀不到這個商品頁", images: [] };
+    return { error: navigator.onLine === false ? "You're offline" : "Couldn't read this product page", images: [] };
   }
 }
 
@@ -131,7 +131,7 @@ const PART_WORDS = [
   // 隨身小物排在包前面:「錢包」「皮夾」跟「包」同一個位置結束時算小物
   ["carry", /鋼筆|原子筆|鋼珠筆|筆|打火機|皮夾|錢包|名片夾|鑰匙圈|\b(pens?|fountain\s?pens?|lighters?|wallets?|card\s?holders?|keychains?)\b/i],
   ["socks", /襪|\bsocks?\b/i],
-  ["shoes", /鞋|靴|拖|\b(shoes?|sneakers?|boots?|loafers?|sandals?|slides?|trainers?|mules?)\b/i],
+  ["shoes", /鞋|靴|拖|\b(shoes?|sneakers?|boots?|loafers?|sandals?|slides?|trainers?|mules?|high-?tops?)\b/i],
   ["bag", /包|袋|\b(bags?|backpacks?|totes?|purses?|crossbody|duffel|weekender|clutch|pouch|luggage|suitcase)\b/i],
   ["eyewear", /眼鏡|墨鏡|\b(sunglasses|glasses|eyewear)\b/i],
   // 手錶、手環;皮帶、項鍊、戒指各自一類(2026-10-06);耳環、帽子、圍巾這類放在「其他配件」
@@ -140,9 +140,9 @@ const PART_WORDS = [
   ["necklace", /項鍊|項链|墜飾|\b(necklaces?|pendants?)\b/i],
   ["ring", /戒指|指環|\brings?\b/i],
   ["accessories_up", /耳環|帽子|棒球帽|毛帽|圍巾|\b(earrings?|caps?|hats?|beanies?|scarf|scarves)\b/i],
-  ["wholebody_up", /外套|夾克|大衣|風衣|背心外套|羽絨|教練|西裝|\b(jackets?|coats?|blazers?|parkas?|windbreakers?|cardigans?)\b/i],
-  ["lowerbody", /褲|裙|\b(pants|trousers|jeans|shorts|skirts?|chinos|joggers?|leggings)\b/i],
-  ["upperbody", /T恤|襯衫|上衣|針織|毛衣|衛衣|帽T|POLO|Polo|背心|連帽|\b(t-?shirts?|tees?|shirts?|polos?|sweaters?|hoodies?|sweatshirts?|tops?|tanks?|knit)\b/i],
+  ["wholebody_up", /外套|夾克|大衣|風衣|背心外套|羽絨|教練|西裝|\b(jackets?|coats?|raincoats?|overcoats?|blazers?|parkas?|windbreakers?|cardigans?)\b/i],
+  ["lowerbody", /褲|裙|\b(pants|sweatpants|trousers|jeans|shorts|skirts?|chinos|joggers?|leggings)\b/i],
+  ["upperbody", /T恤|襯衫|上衣|針織|毛衣|衛衣|帽T|POLO|Polo|背心|連帽|\b(t-?shirts?|tees?|shirts?|polos?|sweaters?|hoodies?|sweatshirts?|(?<!high-?)tops?|tanks?|knit)\b/i],
 ];
 
 export function partFromName(name) {

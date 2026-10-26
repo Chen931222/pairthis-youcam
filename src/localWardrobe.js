@@ -76,8 +76,8 @@ async function putRecord(record, options) {
 /* 讀不到的圖用這張代替(不是「?」),點開那件可以「換圖」;開了同步的會從雲端拿回原本那張 */
 export const BROKEN_IMAGE = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240"><rect x="1" y="1" width="198" height="238" fill="none" stroke="#5a4c3a" stroke-dasharray="6 6"/>'
-  + '<text x="100" y="116" text-anchor="middle" font-family="serif" font-size="17" fill="#9b8c73">圖讀不到</text>'
-  + '<text x="100" y="142" text-anchor="middle" font-family="serif" font-size="12" fill="#9b8c73">點開按「換圖」</text></svg>',
+  + '<text x="100" y="116" text-anchor="middle" font-family="serif" font-size="17" fill="#9b8c73">Image unavailable</text>'
+  + '<text x="100" y="142" text-anchor="middle" font-family="serif" font-size="12" fill="#9b8c73">Open it, tap “Change image”</text></svg>',
 )}`;
 
 /* 圖的 object URL 依 id 重用:同步後會常常重讀,每次都新建網址的話,舊的一直不釋放、
@@ -198,7 +198,7 @@ function scheduleThumbs(records) {
       thumbBusy = id;
       try {
         const blob = await makeThumb(record.blob);
-        if (!blob) throw new Error("做不出縮圖");
+        if (!blob) throw new Error("Couldn't make a thumbnail");
         await thumbTx("readwrite", (store) => store.put({ id, sig: sigOf(record.blob), blob }));
         made += 1;
       } catch {
@@ -309,9 +309,9 @@ export function findUrl(text) {
 export function productUrlProblem(text) {
   if (!String(text || "").trim()) return "";
   const url = findUrl(text);
-  if (!url) return "這裡找不到網址。到品牌的商品頁按分享、拷貝連結再貼";
+  if (!url) return "There's no link in this. On the brand's product page, tap Share, copy the link, and paste it here.";
   if (typeof window !== "undefined" && new URL(url).host === window.location.host) {
-    return "這是衣櫃自己的網址。到品牌的商品頁按分享、拷貝連結再貼";
+    return "That's this closet's own link. On the brand's product page, tap Share, copy the link, and paste it here.";
   }
   return "";
 }
@@ -361,11 +361,11 @@ export async function dumpLocalRecords() {
 /** 同步用:讀不到就丟錯。不能像 dumpLocalRecords 那樣回空陣列——同步會把「空的」當成「這台把衣服全刪了」,
  *  再把刪除推到雲端和其他裝置。 */
 export async function readLocalRecords() {
-  if (typeof indexedDB === "undefined") throw new Error("這個瀏覽器不能存衣服,先不同步");
+  if (typeof indexedDB === "undefined") throw new Error("This browser can't save clothes, so sync is paused");
   try {
     return ((await tx("readonly", (store) => store.getAll())) || []).map(decode);
   } catch {
-    throw new Error("讀不到這台存的衣服,先不同步(免得把雲端當成全刪了)");
+    throw new Error("Couldn't read the clothes saved on this device, so sync is paused (so the cloud copy isn't treated as all deleted)");
   }
 }
 

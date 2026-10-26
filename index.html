@@ -1,6 +1,7 @@
 <!doctype html>
 <!-- [本 fork 修改] 上游 tandpfun/wardrobe 既有檔案。本 fork 的改動:改為繁中站台 meta:lang/標題/描述中文化、theme-color 換深色;2026-10-08 預設改淺色(data-theme="light"、theme-color #ece3d1)。 -->
-<html lang="zh-Hant" data-theme="light">
+<!-- [參賽版修改 2026-10-26] YouCam 黑客松參賽版改成英文:lang、描述、分享預覽的網址指向參賽網站。og.png 的圖上還是中文標題,沒有重做 -->
+<html lang="en" data-theme="light">
   <!-- impeccable-disable cream-palette -- 淺樺木底是衣櫃打開後的內裝色,不是預設奶油底。本人 2026-10-08 看過深底、淺底、淺底加底板三張對照後選淺底加底板:衣櫃大多是白米灰,在近黑底上每件都發亮、看了頭暈。對照圖在 work/ui-compare-2026-10-08/ -->
   <!-- impeccable-disable text-occlusion -- 天氣列的城市選單是透明(opacity 0)的原生 select 疊在城市名上,讓手機點了叫出原生選單;字沒有真的被擋住 -->
   <head>
@@ -10,26 +11,26 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="PairThis" />
-    <meta name="description" content="用你已有的衣服，照今天的天氣搭一套，告訴你為什麼。不用帳號，去背在你的裝置上算。" />
+    <meta name="description" content="From the clothes you already own: an outfit for today's weather, and why it works. Try a piece on yourself before you buy. No account; background removal runs on your device." />
     <!-- 分享預覽(2026-10-23 本人「傳連結時更能清楚表達網站資訊」):以前沒有 og 標籤,LINE 只抓得到正方形的主畫面圖示,兩邊灰條。
          og.png 是 1200×630,左邊標題三句、右邊示範人台(work/preview-2026-10-23-brand/og/make-og.mjs 產的)。
-         網址要寫完整的 https://pairthis.app/…,LINE、FB 不吃相對路徑 -->
+         網址要寫完整的 https://…,LINE、FB 不吃相對路徑 -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="PairThis 搭這件" />
-    <meta property="og:locale" content="zh_TW" />
-    <meta property="og:url" content="https://pairthis.app/" />
-    <meta property="og:title" content="PairThis 搭這件｜照天氣配一套" />
-    <meta property="og:description" content="用你已有的衣服，照今天的天氣搭一套，告訴你為什麼。不用帳號，去背在你的裝置上算，網購的貼商品連結就能加。" />
-    <meta property="og:image" content="https://pairthis.app/og.png?v=20261024" />
+    <meta property="og:site_name" content="PairThis" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://pairthis-youcam.vercel.app/" />
+    <meta property="og:title" content="PairThis · An outfit for today's weather" />
+    <meta property="og:description" content="From the clothes you already own: an outfit for today's weather, and why it works. Try a piece on yourself with YouCam AI before you buy. No account; background removal runs on your device." />
+    <meta property="og:image" content="https://pairthis-youcam.vercel.app/og.png?v=20261024" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="PairThis 搭這件：左邊是 PAIR THIS 標誌和「用你已有的衣服，照今天的天氣搭一套，告訴你為什麼。」右邊是穿著一套示範穿搭的人台" />
+    <meta property="og:image:alt" content="PairThis: the PAIR THIS logo with a tagline in Chinese on the left, a dress form wearing a demo outfit on the right" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon-64.png" type="image/png" sizes="64x64" />
     <!-- 主畫面圖示(2026-10-23):iPhone 不吃 SVG,沒有這個檔就拿網頁截圖當圖示。衣架 T 恤在紙底上,佔 64% -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>PairThis 搭這件</title>
+    <title>PairThis</title>
   </head>
   <body>
     <div id="root"></div>

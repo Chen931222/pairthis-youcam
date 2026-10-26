@@ -17,7 +17,7 @@ export function CitySelect() {
   const city = useCity();
   return (
     <span className="city-select">
-      <select aria-label="天氣看哪個城市" value={city.key} onChange={(event) => saveCity(event.target.value)}>
+      <select aria-label="City for the weather" value={city.key} onChange={(event) => saveCity(event.target.value)}>
         {CITIES.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
       </select>
       <span className="city-select-label" aria-hidden="true">{city.label}</span>
