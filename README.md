@@ -3,6 +3,8 @@
 A closet app that dresses you from the clothes you already own. For the YouCam API hackathon it gained one more step before you buy something: try the piece on yourself with YouCam AI Clothes, then see how many similar pieces you already have and which outfits it would make with your closet.
 
 - Live (contest version, English): https://pairthis-youcam.vercel.app
+- Demo video (2:36): https://youtu.be/T6yK8kjC5rA
+- Devpost: https://devpost.com/software/pairthis
 - Built for the YouCam API Skin AI & eCommerce VTO Hackathon, eCommerce VTO track
 - The original Chinese app runs at https://pairthis.app; its readme is in [README.zh-TW.md](README.zh-TW.md)
 
