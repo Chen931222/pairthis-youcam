@@ -71,7 +71,7 @@ const STEPS = [
   { key: "weather", no: "02", title: ["One outfit for your weather,", "with the reasons"], body: "The weather is for the city you choose. Not enough clothes for a full outfit yet? It borrows the missing pieces from the demo closet." },
   // [參賽版修改 2026-10-26] 原本的 03「不喜歡,打一句話就換」講的輸入框只懂中文,英文版藏起來了(OutfitStudio 的 ASK_BOX),
   // 第三章改講試穿。秒數照實測:2026-10-25 本機 18 秒內、2026-10-26 線上 13.4 秒,各一次
-  { key: "tryon", no: "03", title: ["See it on you", "before you buy"], body: "Open a top or a jacket, add a chest-up photo of yourself and tap “Try this on”. YouCam's AI puts the piece on you; in two test runs it was ready in under 20 seconds. It works for a piece you're looking at in a store, too." },
+  { key: "tryon", no: "03", title: ["See it on you", "before you buy"], body: "Open a top or a jacket, add a chest-up photo of yourself and tap “Try this on”. YouCam's AI puts the piece on you; in our test runs it was ready in under 20 seconds. It works for a piece you're looking at in a store, too." },
 ];
 // [參賽版修改 2026-10-26] 01、02 章的短片和最下面的 25 秒介紹是中文介面錄的:英文版換成英文介面的手機截圖(/media/still-*.jpg),介紹片先不放
 const CONTEST_STILLS = true;

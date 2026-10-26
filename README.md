@@ -10,7 +10,7 @@ A closet app that dresses you from the clothes you already own. For the YouCam A
 
 - **Your own closet, without an account.** Paste a product link or take a photo of a piece. The background is removed on your device and everything stays in your browser.
 - **One outfit for today's weather, with the reasons.** It picks from your closet for the weather in your city and writes why, for example “Feels like 34°, go for breathable pieces” or “Only “Navy hooded windbreaker” has color; the muted pieces set it off”.
-- **Try it on you (YouCam AI Clothes).** On a top's or jacket's page, add a chest-up photo of yourself and tap “Try this on”. The result appears at the top of the item page. In two test runs it was ready in under 20 seconds.
+- **Try it on you (YouCam AI Clothes).** On a top's or jacket's page, add a chest-up photo of yourself and tap “Try this on”. The result appears at the top of the item page. In our test runs it was ready in under 20 seconds.
 - **Before you buy.** In a store, “In a store?” lets you photograph the piece you're holding. It shows how many similar pieces you already own, the outfits it would make with what you have, and lets you try it on. Wishlist pieces get the same check.
 
 ## How the YouCam integration works
