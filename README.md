@@ -50,7 +50,7 @@ To deploy: `npx vite build && node tools/export-static.mjs` writes `contest-site
 
 ## What changed during the hackathon
 
-The app existed before the submission period, which started on 2026-09-29. 107 of the 130 commits in this repository (as of 2026-10-26) were made after that date, including:
+The app existed before the submission period, which started on 2026-09-29. Only 23 commits in this repository predate that date; the rest, over 100, came after it, including:
 
 - 10-01 onward: wishlist and dream pieces; anyone can build their own closet in their browser; outfit reasons; prices; trash; search
 - 10-10: “Compare in store”
