@@ -999,7 +999,8 @@ const PART_NAME = { upperbody: "tops", lowerbody: "bottoms", wholebody_up: "jack
 
 /** 想買的那件:櫃裡有沒有很像的、跟已經有的能配出什麼。買之前看一眼用。
  *  店裡比一下(AddGarment)也用這個:那件還沒存,onOpen、onWearOutfit 給 null,縮圖不能點、沒有「穿上看看」 */
-function WishCheck({ item, owned, onOpen, onWearOutfit, loose = false }) {
+/** inDemo:比的是示範衣櫃(參賽版店裡比一下,看示範衣櫃時),字要照實寫「示範衣櫃」,不能說成你的 */
+function WishCheck({ item, owned, onOpen, onWearOutfit, loose = false, inDemo = false }) {
   // 只在這件或衣櫃清單真的變了才重算:三套是亂數配的,同步重讀衣櫃就換一組,使用者正要按「穿這套」
   const keyOf = (piece) => [piece.id, piece.part, piece.name, piece.color, piece.secondaryColor, (piece.tags || []).join(",")].join(":");
   const ownedKey = owned.map(keyOf).join("|");   // 名稱、標籤、副色都會影響「很像」和配色,要算進來
@@ -1014,11 +1015,11 @@ function WishCheck({ item, owned, onOpen, onWearOutfit, loose = false }) {
   return (
     <div className="wish-check">
       <section aria-labelledby={`wish-similar-${item.id}`}>
-        <h3 id={`wish-similar-${item.id}`}>Similar pieces you own</h3>
+        <h3 id={`wish-similar-${item.id}`}>{inDemo ? "Similar pieces in the demo closet" : "Similar pieces you own"}</h3>
         {similar.length ? (
           <>
             <p>
-             You already have {similar.length} like this: {kind}, {same}
+             {inDemo ? "The demo closet already has" : "You already have"} {similar.length} like this: {kind}, {same}
               {fit && (sameFit === similar.length ? `, ${similar.length === 1 ? "also" : "all"} ${fit}` : sameFit ? `, ${sameFit} of them also ${fit}` : `, can't tell if ${similar.length === 1 ? "it's" : "they're"} ${fit}`)}.
             </p>
             <div className="wish-thumbs">
@@ -1040,7 +1041,7 @@ function WishCheck({ item, owned, onOpen, onWearOutfit, loose = false }) {
       </section>
 
       <section aria-labelledby={`wish-outfits-${item.id}`}>
-        <h3 id={`wish-outfits-${item.id}`}>How it pairs with what you own</h3>
+        <h3 id={`wish-outfits-${item.id}`}>{inDemo ? "How it pairs with the demo closet" : "How it pairs with what you own"}</h3>
         {plan.error ? <p>{plan.error}</p> : (
           <>
             <p>
@@ -2099,7 +2100,9 @@ export function App() {
               {CAN_ADD && (
                 <AddGarment
                   existing={closet === "all" ? items : items.filter((item) => item.isLocal)}
-                  renderCheck={(wish, owned) => <WishCheck item={wish} owned={owned} onOpen={null} onWearOutfit={null} loose />}
+                  // [參賽版修改 2026-10-26] 看示範衣櫃時,店裡比一下跟示範衣櫃比:評審第一次來自己的衣櫃是空的,只會看到「沒有像的、先加一件下身」。
+                  // 存檔時的重複提醒(existing)照舊只看自己的衣櫃
+                  renderCheck={(wish, owned) => <WishCheck item={wish} owned={closet === "demo" ? demoItems : owned} inDemo={closet === "demo"} onOpen={null} onWearOutfit={null} loose />}
                   onAddOne={(item) => {
                     setQuantity(item.id, qtyOf(item.quantity) + 1);
                     say(`Not saved as new: “${item.name || "that piece"}” is now ×${qtyOf(item.quantity) + 1}.`);
