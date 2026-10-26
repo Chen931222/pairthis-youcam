@@ -988,7 +988,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
               <input
                 value={draft.name}
                 onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-                placeholder="E.g. UNIQLO oxford"
+                placeholder="E.g. oxford, size M"
               />
             </label>
 
@@ -1093,7 +1093,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
               <input
                 value={draft.name}
                 onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-                placeholder={draft.wishlist ? "E.g. GU wide-leg jeans" : "E.g. white canvas sneakers"}
+                placeholder={draft.wishlist ? "E.g. wide-leg jeans" : "E.g. white canvas sneakers"}
               />
             </label>
 
@@ -1104,7 +1104,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
                 list="add-brand-options"
                 autoComplete="off"
                 onChange={(event) => setDraft((current) => ({ ...current, brand: event.target.value }))}
-                placeholder={brandOf({ name: draft.name }) ? `The name says ${brandOf({ name: draft.name })}, no need to fill this in` : "Optional, e.g. UNIQLO"}
+                placeholder={brandOf({ name: draft.name }) ? `The name says ${brandOf({ name: draft.name })}, no need to fill this in` : "Optional, as on the tag"}
               />
               <datalist id="add-brand-options">{brandSuggestions(existing).map((brand) => <option key={brand} value={brand} />)}</datalist>
             </label>
