@@ -178,7 +178,7 @@
   },
   {
     "id": "import-694650a4-f2fb-40f4-b68a-c8fccc2cddd2",
-    "name": "White oversized drop-shoulder half-sleeve tee (GU)",
+    "name": "White oversized drop-shoulder half-sleeve tee",
     "part": "upperbody",
     "color": "#f5f3ee",
     "secondaryColor": null,
@@ -187,8 +187,7 @@
     ],
     "tags": [
       "tee",
-      "oversized",
-      "gu"
+      "oversized"
     ],
     "image": "/data/library/import-694650a4-f2fb-40f4-b68a-c8fccc2cddd2-view.webp",
     "thumbnail": "/data/library/import-694650a4-f2fb-40f4-b68a-c8fccc2cddd2-thumb.webp",
@@ -203,7 +202,7 @@
   },
   {
     "id": "import-7bc2fc11-8b9b-44dd-aac2-ff708aa3e2e3",
-    "name": "Navy cotton twill casual shorts (Timberland)",
+    "name": "Navy cotton twill casual shorts",
     "part": "lowerbody",
     "color": "#1f2227",
     "secondaryColor": null,
@@ -212,8 +211,7 @@
     ],
     "tags": [
       "shorts",
-      "chino",
-      "timberland"
+      "chino"
     ],
     "image": "/data/library/import-7bc2fc11-8b9b-44dd-aac2-ff708aa3e2e3-view.webp",
     "thumbnail": "/data/library/import-7bc2fc11-8b9b-44dd-aac2-ff708aa3e2e3-thumb.webp",
@@ -302,7 +300,7 @@
   },
   {
     "id": "import-6677979f-0212-433d-9c9d-a1b5a3d8b9f1",
-    "name": "Navy hooded windbreaker (Polo Ralph Lauren)",
+    "name": "Navy hooded windbreaker",
     "part": "wholebody_up",
     "color": "#2e3a5c",
     "secondaryColor": null,
@@ -311,8 +309,7 @@
     ],
     "tags": [
       "jacket",
-      "windbreaker",
-      "polo-rl"
+      "windbreaker"
     ],
     "image": "/data/library/import-6677979f-0212-433d-9c9d-a1b5a3d8b9f1-view.webp",
     "thumbnail": "/data/library/import-6677979f-0212-433d-9c9d-a1b5a3d8b9f1-thumb.webp",
@@ -378,7 +375,7 @@
   },
   {
     "id": "import-47d9abaf-d6c9-4531-96f1-dbb801789d03",
-    "name": "Black leather chunky-sole casual shoes (TOD'S)",
+    "name": "Black leather chunky-sole casual shoes",
     "part": "shoes",
     "color": "#1a1a1a",
     "secondaryColor": null,
@@ -389,7 +386,6 @@
       "sneakers",
       "leather",
       "black",
-      "tods",
       "chunky"
     ],
     "image": "/data/library/import-47d9abaf-d6c9-4531-96f1-dbb801789d03-view.webp",
@@ -405,7 +401,7 @@
   },
   {
     "id": "import-9a5fc2a3-c5c0-4220-b018-cb4a974c09a5",
-    "name": "Gray-purple technical retro running shoes (New Balance 1000)",
+    "name": "Gray-purple technical retro running shoes",
     "part": "shoes",
     "color": "#6a6068",
     "secondaryColor": "#b0aab2",
@@ -417,8 +413,7 @@
       "sneakers",
       "running",
       "retro",
-      "grey",
-      "new balance"
+      "grey"
     ],
     "image": "/data/library/import-9a5fc2a3-c5c0-4220-b018-cb4a974c09a5-view.webp",
     "thumbnail": "/data/library/import-9a5fc2a3-c5c0-4220-b018-cb4a974c09a5-thumb.webp",
@@ -489,7 +484,7 @@
   },
   {
     "id": "import-0f200539-74a5-4378-bd43-37c213e3efd3",
-    "name": "Black nylon laptop backpack (Samsonite)",
+    "name": "Black nylon laptop backpack",
     "part": "bag",
     "color": "#1a1a1c",
     "secondaryColor": null,
@@ -500,8 +495,7 @@
       "backpack",
       "laptop",
       "nylon",
-      "black",
-      "samsonite"
+      "black"
     ],
     "image": "/data/library/import-0f200539-74a5-4378-bd43-37c213e3efd3-view.webp",
     "thumbnail": "/data/library/import-0f200539-74a5-4378-bd43-37c213e3efd3-thumb.webp",
