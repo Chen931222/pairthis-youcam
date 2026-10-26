@@ -13,7 +13,7 @@ const ALL_UPDATES = [
     title: "Try it on you (contest version)",
     items: [
       "Item pages for tops and outerwear now have “Try it on you”: add a chest-up, front-facing photo, tap “Try this on”, and the try-on photo appears at the top of the item page (ready in under 20 seconds in two test runs).",
-      "Your photo stays on this device. Only when you tap “Try this on” are the photo and the piece's image sent to YouCam (Perfect Corp.) to make the try-on; up to 40 a day from the same internet connection.",
+      "Your photo stays on this device. Only when you tap “Try this on” are the photo and the piece's image sent to YouCam (Perfect Corp.) to make the try-on; up to 100 a day from the same internet connection.",
       "Compare in store can try on too: photograph the piece in the store, choose Top or Outerwear, and after the comparison there's “Try this on”.",
       "Bottoms and shoes can't be tried on yet: YouCam needs a reference photo of them being worn, and the closet's photos are flat lays.",
     ],

@@ -170,7 +170,7 @@ export function tryOnMessage(code) {
     case "error_apply_region_mismatch": return "Couldn't tell what kind of garment this is. Try an image of the whole piece, front view, laid flat.";
     case "error_nsfw_content_detected": return "This photo was blocked. Try another one.";
     case "exceed_max_filesize": return "That photo is too large. Try another one.";
-    case "daily_limit": return "Today's try-ons from this internet connection are used up (40 a day). Come back tomorrow.";
+    case "daily_limit": return "Today's try-ons from this internet connection are used up (100 a day). Come back tomorrow.";
     case "site_busy": return "Too many try-ons today. Try-on is paused until tomorrow.";
     case "rate": return "That was too fast. Wait a minute and try again.";
     case "timeout": return "Still not ready after two minutes. Close this for now; open this piece again later and the result will be there once it's done.";
@@ -228,6 +228,7 @@ export async function awaitTryOn({ photoId, garmentKey, task, signal, onTick }) 
 
 /** 送出一次試穿:準備兩張圖 → POST → 記下 task(關掉頁面再打開還接得回來)→ 等結果 */
 export async function startTryOn({ photo, garmentSrc, garmentKey, part, signal, onTick }) {
+  const startedAt = Date.now();   // 按下的那一刻:關掉再打開接著等時,秒數也從這裡算
   const category = TRY_ON_CATEGORY[part];
   if (!category) throw new TryOnError("error_invalid_ref");
   const garment = await prepareGarment(garmentSrc).catch(() => { throw new TryOnError("error_invalid_ref"); });
@@ -238,6 +239,6 @@ export async function startTryOn({ photo, garmentSrc, garmentKey, part, signal, 
     body: JSON.stringify({ person, garment: ref, category }),
     signal,
   });
-  await writePending(photo.id, garmentKey, { task, startedAt: Date.now() });
+  await writePending(photo.id, garmentKey, { task, startedAt });
   return awaitTryOn({ photoId: photo.id, garmentKey, task, signal, onTick });
 }

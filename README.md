@@ -24,7 +24,7 @@ A closet app that dresses you from the clothes you already own. For the YouCam A
 | Result | `checkTryOn` | The server downloads the result and returns it as a data URL; the page saves it in IndexedDB. Nothing is stored on our server. |
 
 - The API key is a server environment variable (`YOUCAM_API_KEY`); it never reaches the browser.
-- Limits so judges still have units during judging: 4 starts per minute and 40 per day per IP address, 150 per day per server instance. A try-on uses 2 YouCam units (measured).
+- Limits so one visitor can't use up the units: 4 starts per minute and 100 per day per IP address, 300 per day per server instance. The counts live in memory on each server instance, so they're a brake, not an exact quota. A try-on uses 2 YouCam units (measured).
 - YouCam error codes (pose not found, more than one person, file too small, and so on) are turned into one plain sentence each in `src/tryon.js`.
 - Only tops and outerwear are offered. For bottoms and shoes YouCam needs a reference photo of the piece being worn, and closet photos are flat lays.
 
@@ -32,8 +32,8 @@ A closet app that dresses you from the clothes you already own. For the YouCam A
 
 1. Open https://pairthis-youcam.vercel.app and tap **See a demo outfit**. The demo closet has 20 pieces.
 2. Go to **Closet**, open a top such as *Navy ribbed knit crew-neck sweater*, and under **Try it on you** tap **Take or choose a photo**. Use a chest-up photo, facing the camera, with your shoulders and whole face in view and only you in it. Then tap **Try this on**.
-3. Tap **In a store?**, take or choose a photo of a garment, crop it, choose **Top** or **Outerwear**, and look at the similar pieces and outfits. **Try this on** works there too.
-4. Your photo is sent to YouCam only when you tap **Try this on**. Try-on allows 40 a day from one internet connection, shared by everyone on that network.
+3. Tap **In a store?**, take or choose a photo of a garment, crop it, choose **Tops** or **Outerwear**, and look at the similar pieces and outfits. **Try this on** works there too.
+4. Your photo is sent to YouCam only when you tap **Try this on**. Try-on allows 100 a day from one internet connection, shared by everyone on that network.
 5. The weather list has cities in Taiwan, where the app was built. Product links were tested with GU's and UNIQLO's Taiwan sites; for other sites, use a screenshot.
 
 ## Run it locally

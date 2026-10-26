@@ -56,6 +56,7 @@ export function useTryOn({ garmentKey, garmentSrc, part }) {
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState("");
   const abortRef = useRef(null);
+  const startRef = useRef(0);
   const enabled = canTryOn(part) && Boolean(garmentKey);
 
   const showBlob = useCallback((blob) => {
@@ -87,9 +88,10 @@ export function useTryOn({ garmentKey, garmentSrc, part }) {
       if (record.blob) { showBlob(record.blob); return; }
       const controller = new AbortController();
       abortRef.current = controller;
+      startRef.current = record.startedAt;
       setStatus("running");
       setElapsed(Date.now() - record.startedAt);
-      follow(awaitTryOn({ photoId: photo.id, garmentKey, task: record.task, signal: controller.signal, onTick: () => setElapsed(Date.now() - record.startedAt) }));
+      follow(awaitTryOn({ photoId: photo.id, garmentKey, task: record.task, signal: controller.signal, onTick: () => setElapsed(Date.now() - startRef.current) }));
     });
     return () => { live = false; abortRef.current?.abort(); };
   }, [enabled, photo, garmentKey, showBlob, follow]);
@@ -100,10 +102,19 @@ export function useTryOn({ garmentKey, garmentSrc, part }) {
     const controller = new AbortController();
     abortRef.current = controller;
     setError("");
+    startRef.current = Date.now();
     setElapsed(0);
     setStatus("running");
-    follow(startTryOn({ photo, garmentSrc, garmentKey, part, signal: controller.signal, onTick: setElapsed }));
+    follow(startTryOn({ photo, garmentSrc, garmentKey, part, signal: controller.signal, onTick: () => setElapsed(Date.now() - startRef.current) }));
   }, [photo, garmentSrc, garmentKey, part, status, follow]);
+
+  // [參賽版修改 2026-10-26] 秒數從按下那一刻算(含上傳、開 task),每秒跳一次。原本等上傳完才起算、每 3 秒才跳,
+  // 畫面比實際少 3 秒左右(驗收對錄影抓到)
+  useEffect(() => {
+    if (status !== "running") return undefined;
+    const timer = setInterval(() => setElapsed(Date.now() - startRef.current), 1000);
+    return () => clearInterval(timer);
+  }, [status]);
 
   // 不等了:送出去的那次照樣在 YouCam 跑完,下次打開這件會接著拿
   const stopWaiting = useCallback(() => {
@@ -182,7 +193,7 @@ export function TryOnPanel({ state, compact = false }) {
 
           {status === "running" ? (
             <div className="tryon-status" role="status" aria-live="polite">
-              <p><SpinnerGap size={16} className="add-spinner" aria-hidden="true" /> Making your try-on… {seconds} s so far. In two test runs it was ready in under 20 seconds.</p>
+              <p><SpinnerGap size={16} className="add-spinner" aria-hidden="true" /> Making your try-on… {seconds} s so far. In our test runs it was ready in under 20 seconds.</p>
               <button type="button" className="tryon-link" onClick={stopWaiting}>Stop waiting</button>
             </div>
           ) : status === "done" ? (
@@ -209,7 +220,7 @@ export function TryOnPanel({ state, compact = false }) {
 
       {photoError && <p className="tryon-error" role="alert">{photoError}</p>}
       <p className="tryon-privacy">
-       Your photo stays on this device. When you tap “Try this on”, your photo and this piece's image are sent to YouCam (Perfect Corp.) to make the try-on, and the result is saved back here. Up to 40 try-ons a day from the same internet connection.
+       Your photo stays on this device. When you tap “Try this on”, your photo and this piece's image are sent to YouCam (Perfect Corp.) to make the try-on, and the result is saved back here. Up to 100 try-ons a day from the same internet connection.
       </p>
     </section>
   );

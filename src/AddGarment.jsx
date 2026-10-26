@@ -720,10 +720,10 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             <small className="add-hint">Take a photo of the piece you're looking at, crop it and pick a category. You'll see how many similar pieces you own and what it pairs with. No need to save it.</small>
             <small className="add-hint">
               {modelReady()
-                ? "Photos are processed on this device and never uploaded."
+                ? "Background removal runs on this device. Nothing is uploaded unless you tap “Try this on”."
                 : preloadsEarly()
-                  ? "The first time, it downloads an 80 MB background-removal model, starting when you open this page; open this page once on Wi-Fi at home first. Photos are processed on this device and never uploaded."
-                  : "The first time, it downloads an 80 MB background-removal model when you remove a background; try it once on Wi-Fi at home first. Photos are processed on this device and never uploaded."}
+                  ? "The first time, it downloads an 80 MB background-removal model, starting when you open this page; open this page once on Wi-Fi at home first. Background removal runs on this device; nothing is uploaded unless you tap “Try this on”."
+                  : "The first time, it downloads an 80 MB background-removal model when you remove a background; try it once on Wi-Fi at home first. Background removal runs on this device; nothing is uploaded unless you tap “Try this on”."}
             </small>
             <div className="add-actions">
               <button type="button" className="secondary-button" onClick={() => inputRef.current?.click()}>From photos</button>
@@ -788,7 +788,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
                 {preloadsEarly()
                   ? "The first background removal downloads an 80 MB model, starting when you open this page. "
                   : "The first background removal downloads an 80 MB model when you start it; on mobile data, connect to Wi-Fi before choosing a photo. "}
-                Photos are processed on this device and never uploaded.
+                Background removal runs on this device; the photo isn't uploaded.
               </small>
             )}
             <div className="add-actions">
@@ -865,7 +865,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             <p role="status" aria-live="polite">{status}</p>
             <small>
               {modelReady() ? "" : "The first time, it downloads an 80 MB background-removal model; after that it's much faster. "}
-              Photos are processed on this device and never uploaded.
+              Background removal runs on this device; the photo isn't uploaded.
             </small>
             <button type="button" className="secondary-button add-cancel" onClick={cancelWork}>Cancel</button>
           </div>
@@ -1042,7 +1042,7 @@ export function AddGarment({ onAdded, existing = [], openRequest = 0, onOpenHand
             {draft.pending && (
               <small className="add-hint">
                 {modelReady() ? "Removing the background. Fill in the name and category meanwhile. " : "The first time, it downloads an 80 MB background-removal model. Fill in the name and category meanwhile. "}
-                Photos are processed on this device and never uploaded.
+                Background removal runs on this device; the photo isn't uploaded.
               </small>
             )}
             {!draft.pending && !draft.blob && (

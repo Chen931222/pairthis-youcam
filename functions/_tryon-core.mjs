@@ -39,8 +39,10 @@ function readTicket(key, ticket) {
 
 // 每個 IP 一天最多開幾次試穿、全站(這一台 function)一天最多幾次。記在記憶體,Vercel 開好幾台時各算各的,
 // 跟 _rate-limit.mjs 一樣是擋大量亂打;真正的天花板是帳戶裡的點數
-const PER_IP_DAY = 40;   // [參賽版修改 2026-10-26] 15→40:評審多半在同一間公司、同一個對外網址,15 次是全部人加起來(驗收抓到)
-const PER_INSTANCE_DAY = 150;
+// [參賽版修改 2026-10-26] 15→40:評審多半在同一間公司、同一個對外網址,15 次是全部人加起來(驗收抓到)。
+// 同日 40→100、150→300:規則要評審期間免費、不設限制(Testing),上限只留來擋一個人把點數用光,正常評審碰不到
+const PER_IP_DAY = 100;
+const PER_INSTANCE_DAY = 300;
 const daily = new Map();
 let dayKey = "";
 let instanceCount = 0;
