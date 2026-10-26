@@ -3864,16 +3864,45 @@ h1, h2, h3 {
 .tryon-done p { color: var(--ink); font-size: 14px; line-height: 1.6; }
 .tryon-result { display: block; width: 100%; max-height: 440px; object-fit: contain; background: var(--surface); border: 1px solid var(--line); }
 .tryon-error { color: var(--danger); font-size: 13.5px; line-height: 1.6; }
-.tryon-badge {
-  position: absolute; left: 24px; bottom: 26px; z-index: 6;
-  padding: 6px 10px 7px;
-  background: var(--paper-veil);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  color: var(--ink); font-size: 12px; letter-spacing: .06em;
+.tryon-badge { align-self: flex-start; color: var(--muted); font-size: 12px; letter-spacing: .06em; line-height: 1.5; }
+/* 試穿照要看得清楚臉和整件衣服。2026-10-25 第一次真的試穿(YouCam 的示範人像)發現沿用上游模特兒大圖的版型不行:
+   名牌框壓在臉上、底部的模糊漸層糊掉衣服、平拍那件蓋住一角。試穿時改成名牌在照片上方、照片整張放(不裁、不糊)、
+   底下一行「AI 試穿」,平拍那件放在照片右下方,不蓋到照片 */
+.modeled-hero.is-tryon {
+  flex: 0 0 auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 34px 34px 118px;   /* 底下留給平拍那件:高 128、離底 10,頂端在照片下面 10px */
 }
-/* 試穿照是胸部以上的人像,上游的模特兒照是全身:對焦點往上移,臉不要被名牌框蓋住 */
-.modeled-hero.is-tryon .modeled-hero-photo { object-position: 50% 22%; }
+.modeled-hero.is-tryon::before,
+.modeled-hero.is-tryon::after { display: none; }
+.modeled-hero.is-tryon .modeled-heading {
+  position: static;
+  order: -1;
+  max-width: none;
+  padding: 0 58px 0 0;   /* 右邊讓給關閉鈕 */
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.modeled-hero.is-tryon .modeled-hero-photo {
+  position: static;
+  height: auto;
+  max-height: min(64vh, 620px);
+  object-fit: contain;
+  object-position: center;
+  background: var(--surface);
+}
+.modeled-hero.is-tryon .viewer-art.viewer-art-floating { right: 30px; bottom: 10px; width: 34%; height: 128px; }
+@media (max-width: 1180px) {
+  .modeled-hero.is-tryon { padding-inline: 30px; }
+}
+@media (max-width: 860px) {
+  .modeled-hero.is-tryon { padding-top: 30px; }
+}
 @media (max-width: 520px) {
-  .tryon-badge { left: 20px; bottom: 22px; }
+  .modeled-hero.is-tryon { padding: 30px 22px 106px; }
+  .modeled-hero.is-tryon .viewer-art.viewer-art-floating { right: 18px; bottom: 8px; width: 40%; height: 114px; }
 }
